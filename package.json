@@ -1,0 +1,23 @@
+{
+  "name": "litechat",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "~5.7.2",
+    "vite": "^6.0.3"
+  },
+  "packageManager": "pnpm@10.0.0-rc.0+sha256.57703626082eb6cde4a0eddd7a406172265c8509b6442396dbcc513eef3d0841",
+  "dependencies": {
+    "@types/alpinejs": "^3.13.11",
+    "@types/mithril": "^2.2.7",
+    "alpinejs": "^3.14.7",
+    "mithril": "^2.2.11",
+    "pocketbase": "^0.23.0"
+  }
+}

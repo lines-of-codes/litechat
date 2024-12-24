@@ -1,0 +1,73 @@
+#noChat {
+    margin: 5vh 5vw;
+}
+
+#chats {
+    list-style-type: none;
+    padding-inline: 0;
+    margin: 0;
+}
+
+#chats li {
+    width: initial !important;
+    padding: 10px 15px;
+}
+
+#chatHeader {
+    background-color: #1a1a1a;
+    padding: 8px 10px;
+    border-radius: 5px;
+}
+
+#headerMenuPopover {
+    inset: unset;
+    width: calc(90vw / 4);
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    padding: 0;
+}
+
+#headerMenuPopover>div {
+    display: flex;
+    flex-direction: column;
+}
+
+#headerMenuPopover button:first-child {
+    border-radius: 8px 8px 0 0;
+}
+
+#headerMenuPopover button:not(:first-child):not(:last-child) {
+    border-radius: 0;
+}
+
+#headerMenuPopover button:last-child {
+    border-radius: 0 0 8px 8px;
+}
+
+.secondary {
+    color: #909090;
+    font-size: smaller;
+}
+
+#messageList {
+    margin: 10px 15px;
+}
+
+#messageEntry {
+    width: 100%;
+}
+
+#chatarea {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+}
+
+.message {
+    padding: 10px 15px;
+}
+
+.message .senderName {
+    font-weight: 500;
+    display: flex;
+    align-items: flex-end;
+}
