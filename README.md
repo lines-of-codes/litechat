@@ -8,7 +8,7 @@ Though, this might not be as secure as something like [Signal](https://signal.or
 
 litechat makes use of the Web Crypto API and has the following process.
 
-When creating an account: generate a Ed25519 key pair and store the private key locally, 
+When creating an account: generate a RSA-OAEP key pair and store the private key locally,
 and public key on the server.
 
 When starting a conversation:
@@ -21,9 +21,9 @@ The symmetric key can be rotated when requested, but older chat messages will al
 
 ## Dependencies
 
-- PocketBase: A lightweight database software
+-   PocketBase: A lightweight database software
 
 ## DevDependencies
 
-- vite: bundling
-- typescript: the typescript compiler
+-   vite: bundling
+-   typescript: the typescript compiler
