@@ -25,9 +25,13 @@ if (authRecord.publicKey === "") {
 import NewChat from "./views/newchat";
 import NoChat from "./views/nochat";
 import Chat from "./views/chat";
+import ManageAccount from "./views/manageAccount";
+import AboutPage from "./views/about";
 
 m.route(document.body, "/chat", {
 	"/chat": NoChat,
 	"/chat/:id": Chat,
 	"/newchat": NewChat,
+	"/manageAccount": ManageAccount,
+	"/about": AboutPage,
 });

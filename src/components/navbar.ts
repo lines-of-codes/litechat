@@ -84,8 +84,7 @@ const NavBar = {
 							"button.button#manageAccBtn",
 							{
 								onclick() {
-									window.location.href =
-										"/manageAccount.html";
+									window.location.href = "#!/manageAccount";
 								},
 							},
 							"Manage Account"
@@ -99,6 +98,15 @@ const NavBar = {
 								},
 							},
 							"Logout"
+						),
+						m(
+							"button.button#manageAccBtn",
+							{
+								onclick() {
+									window.location.href = "#!/about";
+								},
+							},
+							"About"
 						),
 					]),
 				]),

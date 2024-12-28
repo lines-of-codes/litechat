@@ -12,14 +12,12 @@ import NavBar from "../components/navbar";
 */
 
 const NoChat = {
-    view: () => {
-        return m("#pagecontainer.grid.gap-2", [
-            m(NavBar),
-            m("main#chatarea", [
-                m("#noChat", "No chat selected.")
-            ])
-        ]);
-    }
+	view: () => {
+		return m("#pagecontainer.grid.gap-2.h-90vh", [
+			m(NavBar),
+			m("main#chatarea", [m("#noChat", "No chat selected.")]),
+		]);
+	},
 } as Component;
 
 export default NoChat;

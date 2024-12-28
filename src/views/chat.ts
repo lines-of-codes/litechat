@@ -19,6 +19,8 @@ interface ChatMessage {
 	created: string;
 }
 
+const notificationSound = new Audio("/notification.flac");
+
 let chatId: string = "";
 let thisUser: UserModel | null = pb.authStore.record as UserModel | null;
 let thisUserId: string = "";
@@ -172,6 +174,11 @@ const Chat = {
 							attachments: data.record.attachments,
 							created: data.record.created,
 						});
+
+						if (data.record.sender != thisUser?.id) {
+							notificationSound.play();
+						}
+
 						break;
 					case "update":
 						const targetMsgIndex = messageList.findIndex(
@@ -197,7 +204,7 @@ const Chat = {
 		messages.unsubscribe();
 	},
 	view: () => {
-		return m("#pagecontainer.grid.gap-2", [
+		return m("#pagecontainer.grid.gap-2.h-90vh", [
 			m(NavBar),
 			recipient === undefined
 				? null
