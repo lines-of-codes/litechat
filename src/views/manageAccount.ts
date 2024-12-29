@@ -33,12 +33,22 @@ import { users } from "../auth";
 */
 
 const authRecord = pb.authStore.record as UserModel;
-let avatar: string = pb.files.getURL(authRecord, authRecord.avatar);
+let avatar: string = "";
 let formData = new FormData();
-let displayName = authRecord.name;
-let email = authRecord.email;
+let displayName = "";
+let email = "";
 
 const ManageAccount = {
+	oninit() {
+		if (authRecord === null) return;
+
+		if (authRecord.avatar !== undefined && authRecord.avatar !== "") {
+			avatar = pb.files.getURL(authRecord, authRecord.avatar);
+		}
+
+		displayName = authRecord.name;
+		email = authRecord.email;
+	},
 	view() {
 		return m("[", [
 			m("header#pageheader", [m("h1", "Manage Account")]),

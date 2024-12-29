@@ -3,7 +3,7 @@ import { generateKey } from "./crypto";
 import pb from "./pocketbase";
 import "./style.css";
 import "./index.css";
-import { UserModel } from "./collections/users";
+import type { UserModel } from "./collections/users";
 import m from "mithril";
 
 if (!pb.authStore.isValid) {
@@ -12,7 +12,7 @@ if (!pb.authStore.isValid) {
 
 const authRecord = pb.authStore.record as UserModel;
 
-if (authRecord.publicKey === "") {
+if (authRecord !== null && authRecord.publicKey === "") {
 	(async () => {
 		const keyPair = await generateKey();
 
@@ -28,10 +28,12 @@ import Chat from "./views/chat";
 import ManageAccount from "./views/manageAccount";
 import AboutPage from "./views/about";
 
-m.route(document.body, "/chat", {
-	"/chat": NoChat,
-	"/chat/:id": Chat,
-	"/newchat": NewChat,
-	"/manageAccount": ManageAccount,
-	"/about": AboutPage,
-});
+if (authRecord !== null) {
+	m.route(document.body, "/chat", {
+		"/chat": NoChat,
+		"/chat/:id": Chat,
+		"/newchat": NewChat,
+		"/manageAccount": ManageAccount,
+		"/about": AboutPage,
+	});
+}
