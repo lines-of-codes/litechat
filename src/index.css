@@ -21,7 +21,7 @@
 
 #headerMenuPopover {
     inset: unset;
-    width: calc(90vw / 4);
+    width: calc(100vw / 4);
     border: 1px solid #2a2a2a;
     border-radius: 8px;
     padding: 0;

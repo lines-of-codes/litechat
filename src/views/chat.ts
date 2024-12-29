@@ -113,14 +113,54 @@ function formatDate(str: string) {
 	return `Sent on ${date.toLocaleString()}`;
 }
 
+async function initChatInfo() {
+	chatInfo = (await chats.getOne(chatId, {
+		fetch: pbMithrilFetch,
+		expand: "members",
+	})) as ChatModel;
+
+	const members = chatInfo.expand?.members as UserModel[];
+	recipients = Object.fromEntries(members.map((value) => [value.id, value]));
+
+	const otherMembers = members.filter((value) => {
+		return value.id != thisUserId;
+	});
+
+	if (otherMembers.length == 0) {
+		window.location.href = "#!/chat";
+	}
+
+	recipient = otherMembers[0];
+
+	const keyFetchResult = await getSymmetricKey(recipient.id, thisUserId);
+
+	if (!keyFetchResult) {
+		return;
+	}
+
+	const result = (await messages.getList(1, 25, {
+		sort: "created",
+		filter: `chat = "${chatId}"`,
+	})) as ListResult<MessageModel>;
+
+	messageList = await Promise.all(
+		result.items.map(async (msg) => {
+			return {
+				id: msg.id,
+				sender: recipients[msg.sender].name,
+				content: await decryptMessage(msg.content, ivFromJson(msg.iv)),
+				attachments: msg.attachments,
+				created: msg.created,
+			};
+		})
+	);
+
+	m.redraw();
+}
+
 const Chat = {
 	oninit: async () => {
 		chatId = m.route.param("id");
-
-		chatInfo = (await chats.getOne(chatId, {
-			fetch: pbMithrilFetch,
-			expand: "members",
-		})) as ChatModel;
 
 		const authRecord = pb.authStore.record;
 
@@ -128,48 +168,7 @@ const Chat = {
 
 		thisUserId = authRecord.id;
 
-		const members = chatInfo.expand?.members as UserModel[];
-		recipients = Object.fromEntries(
-			members.map((value) => [value.id, value])
-		);
-
-		const otherMembers = members.filter((value) => {
-			return value.id != thisUserId;
-		});
-
-		if (otherMembers.length == 0) {
-			window.location.href = "#!/chat";
-		}
-
-		recipient = otherMembers[0];
-
-		const keyFetchResult = await getSymmetricKey(recipient.id, thisUserId);
-
-		if (!keyFetchResult) {
-			return;
-		}
-
-		const result = (await messages.getList(1, 25, {
-			sort: "created",
-			filter: `chat = "${chatId}"`,
-		})) as ListResult<MessageModel>;
-
-		messageList = await Promise.all(
-			result.items.map(async (msg) => {
-				return {
-					id: msg.id,
-					sender: recipients[msg.sender].name,
-					content: await decryptMessage(
-						msg.content,
-						ivFromJson(msg.iv)
-					),
-					attachments: msg.attachments,
-					created: msg.created,
-				};
-			})
-		);
-
-		m.redraw();
+		initChatInfo();
 	},
 	oncreate: async () => {
 		messages.subscribe(
@@ -215,6 +214,13 @@ const Chat = {
 				m.redraw();
 			}
 		);
+	},
+	onupdate() {
+		let newId = m.route.param("id");
+		if (newId === chatId) return;
+
+		chatId = newId;
+		initChatInfo();
 	},
 	onremove() {
 		messages.unsubscribe();

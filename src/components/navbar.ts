@@ -137,9 +137,13 @@ const NavBar = {
 								);
 
 								return m(
-									"a.cleanlink",
+									m.route.Link,
 									{
-										href: `#!/chat/${value.chat.id}`,
+										href: "/chat/:id",
+										params: {
+											id: value.chat.id,
+										},
+										selector: "a.cleanlink",
 									},
 									[
 										m(

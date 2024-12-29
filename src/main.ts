@@ -36,4 +36,8 @@ if (authRecord !== null) {
 		"/about": LazyView("about"),
 		"/importPrivateKey": LazyView("importPrivateKey"),
 	});
+
+	if (authRecord.name === "") {
+		m.route.set("/manageAccount");
+	}
 }
