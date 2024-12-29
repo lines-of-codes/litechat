@@ -13,7 +13,7 @@ import NavBar from "../components/navbar";
 
 const NoChat = {
 	view: () => {
-		return m("#pagecontainer.grid.gap-2.h-90vh", [
+		return m("#pagecontainer.grid.chat-split.gap-2.h-90vh", [
 			m(NavBar),
 			m("main#chatarea", [m("#noChat", "No chat selected.")]),
 		]);

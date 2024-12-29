@@ -25,15 +25,15 @@ if (authRecord !== null && authRecord.publicKey === "") {
 import NewChat from "./views/newchat";
 import NoChat from "./views/nochat";
 import Chat from "./views/chat";
-import ManageAccount from "./views/manageAccount";
-import AboutPage from "./views/about";
+import LazyView from "./views/lazyView";
 
 if (authRecord !== null) {
 	m.route(document.body, "/chat", {
 		"/chat": NoChat,
 		"/chat/:id": Chat,
 		"/newchat": NewChat,
-		"/manageAccount": ManageAccount,
-		"/about": AboutPage,
+		"/manageAccount": LazyView("manageAccount"),
+		"/about": LazyView("about"),
+		"/importPrivateKey": LazyView("importPrivateKey"),
 	});
 }

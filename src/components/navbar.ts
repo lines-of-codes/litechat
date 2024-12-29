@@ -127,7 +127,7 @@ const NavBar = {
 					]
 				),
 				m(
-					"ul#chats",
+					"#chats.flex.flex-col.gap-2",
 					chatRecipients === undefined
 						? null
 						: chatRecipients.map((value) => {

@@ -31,13 +31,20 @@ let symmetricKey: CryptoKey;
 let messageList: ChatMessage[] = [];
 let message: string = "";
 
-async function getSymmetricKey(sender: string, receiver: string) {
+/// Returns true if succeed. false if failed.
+async function getSymmetricKey(
+	sender: string,
+	receiver: string
+): Promise<boolean> {
 	let keyText = localStorage.getItem(`chat_${chatId}`);
 
 	if (keyText === null) {
 		const privateKey = await getKey();
 
-		if (privateKey === null) return;
+		if (privateKey === null) {
+			window.location.href = "#!/importPrivateKey";
+			return false;
+		}
 
 		const keyExchange = (await keyExchanges.getFirstListItem(
 			`chat.id='${chatId}' && sender.id='${sender}' && receiver='${receiver}'`
@@ -63,6 +70,7 @@ async function getSymmetricKey(sender: string, receiver: string) {
 		true,
 		["encrypt", "decrypt"]
 	);
+	return true;
 }
 
 async function decryptMessage(str: string, iv: Uint8Array) {
@@ -135,9 +143,12 @@ const Chat = {
 
 		recipient = otherMembers[0];
 
-		getSymmetricKey(recipient.id, thisUserId);
-	},
-	oncreate: async () => {
+		const keyFetchResult = await getSymmetricKey(recipient.id, thisUserId);
+
+		if (!keyFetchResult) {
+			return;
+		}
+
 		const result = (await messages.getList(1, 25, {
 			sort: "created",
 		})) as ListResult<MessageModel>;
@@ -158,7 +169,8 @@ const Chat = {
 		);
 
 		m.redraw();
-
+	},
+	oncreate: async () => {
 		messages.subscribe(
 			"*",
 			async (data: RecordSubscription<MessageModel>) => {
@@ -204,7 +216,7 @@ const Chat = {
 		messages.unsubscribe();
 	},
 	view: () => {
-		return m("#pagecontainer.grid.gap-2.h-90vh", [
+		return m("#pagecontainer.grid.chat-split.gap-2.h-90vh", [
 			m(NavBar),
 			recipient === undefined
 				? null

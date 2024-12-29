@@ -3,6 +3,7 @@ import m from "mithril";
 import pb from "../pocketbase";
 import { UserModel } from "../collections/users";
 import { users } from "../auth";
+import { getKey } from "../crypto";
 
 /*
 <header id="pageheader">
@@ -104,7 +105,7 @@ const ManageAccount = {
 						"Save changes"
 					),
 				]),
-				m("#right", [
+				m("#right.flex.flex-col.gap-4.items-start", [
 					m("#avatar.flex.flex-col.gap-2.items-start", [
 						m("h2", "Avatar"),
 						avatar === ""
@@ -138,6 +139,37 @@ const ManageAccount = {
 							},
 						}),
 					]),
+					m(
+						"a.cleanlink.button#importPrivateKey",
+						{
+							href: "#!/importPrivateKey",
+						},
+						"Import Private Key"
+					),
+					m(
+						"button.button#exportPrivateKey",
+						{
+							async onclick() {
+								const privKey = await getKey();
+
+								if (privKey === null) {
+									alert("You do not have a private key. 😔");
+									return;
+								}
+
+								await navigator.clipboard.writeText(
+									JSON.stringify(
+										await crypto.subtle.exportKey(
+											"jwk",
+											privKey
+										)
+									)
+								);
+								alert("Copied!");
+							},
+						},
+						"Export Private Key"
+					),
 				]),
 			]),
 		]);
