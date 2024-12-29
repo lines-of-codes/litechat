@@ -22,8 +22,73 @@ The symmetric key can be rotated when requested, but older chat messages will al
 ## Dependencies
 
 -   PocketBase: A lightweight database software
+-   Mithril.js: A lightweight JavaScript framework for Single Page Applications.
 
 ## DevDependencies
 
 -   vite: bundling
 -   typescript: the typescript compiler
+
+## Building & Hosting
+
+After cloning the Git repository,
+To build the project, you must have pnpm.
+If you do not have pnpm, use corepack to install and enable it.
+
+```
+corepack install
+corepack enable
+```
+
+Next, install the project's dependencies using `pnpm install`
+
+> [!IMPORTANT]
+> When building the application, make sure to create a `.env.local` file,
+> and inside it add `VITE_PB_URL=http://127.0.0.1:8090` and replace the URL
+> with wherever you're hosting your PocketBase.
+
+Then, To start a development server, use `pnpm dev`
+To build it, use the `pnpm build` command, and by default, the output should be in the `dist` folder.
+
+To host the application, You can seperately host the database and the frontend, or host both with the same tool.
+
+To seperately host, just copy the contents of the `dist` folder to your desired web hosting software.
+(Nginx, Apache HTTP server, lighttpd, etc.) and start PocketBase.
+
+To host both the database and the frontend with the same tool, In the `pocketbase` folder,
+Create a folder called `pb_public` and copy the contents of the `dist` folder into the new `pb_public` folder.
+
+Finally, to start PocketBase, you could:
+
+-   Start it locally by doing `./pocketbase serve`
+-   Allow connections from anywhere by doing `./pocketbase serve -http 0.0.0.0:8090`, replace `8090` with your preferred port.
+-   For deploying in production, please refer to [PocketBase's documentation](https://pocketbase.io/docs/going-to-production/)
+
+## PocketBase Setup
+
+After you've started PocketBase, please make sure to set it up properly.
+
+On first start, it'll prompt you to create a new superuser account.
+If you're running in a headless environment, you could create a superuser
+account using `./pocketbase superuser create [email] [password]`
+
+Next, open up your browser and open the PocketBase dashboard.
+PocketBase should tell you where the dashboard is when running
+the serve command.
+
+```
+❯ ./pocketbase serve
+2024/12/28 18:43:57 Server started at http://127.0.0.1:8090
+├─ REST API:  http://127.0.0.1:8090/api/
+└─ Dashboard: http://127.0.0.1:8090/_/
+```
+
+Then, In the dashboard, open up the Setting menu, and "Import collections"
+Pick the `pb_schema.json` file. (In the Git repo, should be located at `/pocketbase/pb_schema.json`)
+and follow the on-screen prompt to import the collections.
+
+PocketBase should be ready for use with litechat now.
+
+It is recommended that you explore the PocketBase settings and set everything to match with your
+environment and your needs and follow PocketBase's guide on
+[going to production.](https://pocketbase.io/docs/going-to-production/)
