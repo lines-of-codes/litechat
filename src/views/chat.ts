@@ -151,6 +151,7 @@ const Chat = {
 
 		const result = (await messages.getList(1, 25, {
 			sort: "created",
+			filter: `chat = "${chatId}"`,
 		})) as ListResult<MessageModel>;
 
 		messageList = await Promise.all(
@@ -176,16 +177,18 @@ const Chat = {
 			async (data: RecordSubscription<MessageModel>) => {
 				switch (data.action) {
 					case "create":
-						messageList.push({
-							id: data.record.id,
-							sender: recipients[data.record.sender].name,
-							content: await decryptMessage(
-								data.record.content,
-								ivFromJson(data.record.iv)
-							),
-							attachments: data.record.attachments,
-							created: data.record.created,
-						});
+						if (data.record.chat === chatId) {
+							messageList.push({
+								id: data.record.id,
+								sender: recipients[data.record.sender].name,
+								content: await decryptMessage(
+									data.record.content,
+									ivFromJson(data.record.iv)
+								),
+								attachments: data.record.attachments,
+								created: data.record.created,
+							});
+						}
 
 						if (data.record.sender != thisUser?.id) {
 							notificationSound.play();
@@ -196,6 +199,7 @@ const Chat = {
 						const targetMsgIndex = messageList.findIndex(
 							(v) => v.id === data.record.id
 						);
+						if (targetMsgIndex === -1) return;
 						messageList[targetMsgIndex].content =
 							await decryptMessage(
 								data.record.content,
