@@ -14,6 +14,7 @@ import { ListResult, RecordSubscription } from "pocketbase";
 interface ChatMessage {
 	id: string;
 	sender: string;
+	senderId: string;
 	content: string;
 	attachments: string[];
 	created: string;
@@ -147,6 +148,7 @@ async function initChatInfo() {
 		result.items.map(async (msg) => {
 			return {
 				id: msg.id,
+				senderId: msg.sender,
 				sender: recipients[msg.sender].name,
 				content: await decryptMessage(msg.content, ivFromJson(msg.iv)),
 				attachments: msg.attachments,
@@ -156,6 +158,21 @@ async function initChatInfo() {
 	);
 
 	m.redraw();
+}
+
+async function sendMessage() {
+	if (thisUser === undefined) return;
+
+	const encrypted = await encryptMessage(message);
+
+	messages.create({
+		sender: thisUserId,
+		chat: chatId,
+		content: encrypted.result,
+		iv: JSON.stringify(encrypted.iv),
+	} as MessageModel);
+
+	(document.getElementById("messageEntry") as HTMLInputElement).value = "";
 }
 
 const Chat = {
@@ -179,6 +196,7 @@ const Chat = {
 						if (data.record.chat === chatId) {
 							messageList.push({
 								id: data.record.id,
+								senderId: data.record.sender,
 								sender: recipients[data.record.sender].name,
 								content: await decryptMessage(
 									data.record.content,
@@ -248,14 +266,35 @@ const Chat = {
 							"div#messageList",
 							messageList.map((msg) => {
 								return m("div.message", [
-									m("div.senderName.gap-2", [
-										msg.sender,
-										m(
-											"span.secondary",
-											formatDate(msg.created)
-										),
+									m(".content", [
+										m("div.senderName.gap-2", [
+											msg.sender,
+											m(
+												"span.secondary",
+												formatDate(msg.created)
+											),
+										]),
+										m("div.content", msg.content),
 									]),
-									m("div.content", msg.content),
+									m(".actions", [
+										msg.senderId === thisUserId
+											? m(
+													"button.iconbutton.md",
+													{
+														onclick() {
+															messages.delete(
+																msg.id
+															);
+														},
+													},
+													[
+														m.trust(
+															`<i class="bi bi-trash"></i>`
+														),
+													]
+											  )
+											: null,
+									]),
 								]);
 							})
 						),
@@ -267,37 +306,23 @@ const Chat = {
 										event.target as HTMLInputElement;
 									message = target.value;
 								},
+								onkeydown(event: KeyboardEvent) {
+									if (event.code === "Enter") {
+										message = (
+											document.getElementById(
+												"messageEntry"
+											) as HTMLInputElement
+										).value;
+										sendMessage();
+									}
+								},
 							}),
 							m(
 								"button.button#sendButton",
 								{
-									onclick: async () => {
-										if (thisUser === undefined) return;
-
-										const encrypted = await encryptMessage(
-											message
-										);
-
-										messages.create({
-											sender: thisUserId,
-											chat: chatId,
-											content: encrypted.result,
-											iv: JSON.stringify(encrypted.iv),
-										} as MessageModel);
-
-										(
-											document.getElementById(
-												"messageEntry"
-											) as HTMLInputElement
-										).value = "";
-									},
+									onclick: sendMessage,
 								},
-								[
-									m("img", {
-										src: "/send-fill.svg",
-										alt: "Send message icon",
-									}),
-								]
+								[m.trust(`<i class="bi bi-send-fill"></i>`)]
 							),
 						]),
 				  ]),

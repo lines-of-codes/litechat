@@ -10,12 +10,13 @@
   },
   "devDependencies": {
     "typescript": "~5.7.2",
-    "vite": "^6.0.3"
+    "vite": "^6.0.6"
   },
   "packageManager": "pnpm@10.0.0-rc.0+sha256.57703626082eb6cde4a0eddd7a406172265c8509b6442396dbcc513eef3d0841",
   "dependencies": {
     "@types/mithril": "^2.2.7",
-    "mithril": "^2.2.11",
+    "bootstrap-icons": "^1.11.3",
+    "mithril": "^2.2.12",
     "pocketbase": "^0.23.0"
   }
 }

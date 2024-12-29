@@ -1,10 +1,11 @@
 import { users } from "./auth";
 import { generateKey } from "./crypto";
 import pb from "./pocketbase";
-import "./style.css";
-import "./index.css";
 import type { UserModel } from "./collections/users";
 import m from "mithril";
+import "bootstrap-icons/font/bootstrap-icons.min.css";
+import "./style.css";
+import "./index.css";
 
 if (!pb.authStore.isValid) {
 	window.location.href = "login.html";

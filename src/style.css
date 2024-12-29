@@ -98,6 +98,11 @@ html, body {
     transition: border-color 250ms;
 }
 
+.iconbutton.md {
+    font-size: 1em;
+    padding: 3px 10px;
+}
+
 a.button {
     color: inherit;
 }

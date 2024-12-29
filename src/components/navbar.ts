@@ -70,12 +70,7 @@ const NavBar = {
 					m("h1", "litechat"),
 					m(
 						"button.iconbutton[popovertarget='headerMenuPopover']",
-						{
-							style: "padding-top: 3px;",
-						},
-						m(
-							"img[src='/menu-meatballs-1.svg'][width=16][alt='Menu']"
-						)
+						m.trust(`<i class="bi bi-three-dots"></i>`)
 					),
 				]),
 				m("nav#headerMenuPopover[popover='']", [
@@ -118,11 +113,7 @@ const NavBar = {
 						},
 					},
 					[
-						m("img", {
-							src: "/plus.svg",
-							width: 18,
-							alt: "Add icon",
-						}),
+						m.trust(`<i class="bi bi-plus"></i>`),
 						m("span", "New chat"),
 					]
 				),

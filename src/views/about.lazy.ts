@@ -45,10 +45,27 @@ const AboutPage = {
 				]),
 				m("div", [
 					m("strong", "Icons sourced from"),
-					m(
-						"div",
-						"Lineicons Free (MIT license) & Bootstrap Icons (MIT license)"
-					),
+					m("div", [
+						m(
+							"a",
+							{
+								href: "https://icons.getbootstrap.com/",
+								rel: "noreferrer noopener",
+								target: "_blank",
+							},
+							"Bootstrap Icons"
+						),
+						m("span", " "),
+						m(
+							"a",
+							{
+								href: "https://github.com/twbs/icons/blob/main/LICENSE",
+								rel: "noreferrer noopener",
+								target: "_blank",
+							},
+							"(MIT license)"
+						),
+					]),
 				]),
 				m("div", [
 					m("strong", "Tools & Libraries"),

@@ -50,7 +50,7 @@
 }
 
 #messageList {
-    margin: 10px 15px;
+    margin-top: 0.5em;
 }
 
 #messageEntry {
@@ -64,6 +64,23 @@
 
 .message {
     padding: 10px 15px;
+    border-radius: 5px;
+    transition: background-color 75ms;
+    display: flex;
+    justify-content: space-between;
+}
+
+.message:hover {
+    background-color: rgba(0, 0, 0, 0.25);
+}
+
+.message .actions {
+    display: none;
+}
+
+.message:hover .actions {
+    display: flex;
+    align-items: center;
 }
 
 .message .senderName {
