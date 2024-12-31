@@ -173,7 +173,7 @@
   },
   {
     "id": "_pb_users_auth_",
-    "listRule": "id = @request.auth.id",
+    "listRule": "",
     "viewRule": "",
     "createRule": "",
     "updateRule": "id = @request.auth.id",
@@ -825,6 +825,42 @@
         "type": "relation"
       },
       {
+        "autogeneratePattern": "",
+        "hidden": false,
+        "id": "text1579384326",
+        "max": 100,
+        "min": 0,
+        "name": "name",
+        "pattern": "",
+        "presentable": false,
+        "primaryKey": false,
+        "required": false,
+        "system": false,
+        "type": "text"
+      },
+      {
+        "hidden": false,
+        "id": "file347571224",
+        "maxSelect": 1,
+        "maxSize": 0,
+        "mimeTypes": [
+          "image/jpeg",
+          "image/png",
+          "image/svg+xml",
+          "image/gif",
+          "image/webp"
+        ],
+        "name": "photo",
+        "presentable": false,
+        "protected": false,
+        "required": false,
+        "system": false,
+        "thumbs": [
+          "30x30"
+        ],
+        "type": "file"
+      },
+      {
         "hidden": false,
         "id": "autodate2990389176",
         "name": "created",
@@ -873,7 +909,7 @@
         "type": "text"
       },
       {
-        "cascadeDelete": false,
+        "cascadeDelete": true,
         "collectionId": "pbc_3861817060",
         "hidden": false,
         "id": "relation1704850090",
@@ -987,7 +1023,7 @@
         "type": "relation"
       },
       {
-        "cascadeDelete": false,
+        "cascadeDelete": true,
         "collectionId": "pbc_3861817060",
         "hidden": false,
         "id": "relation1704850090",
