@@ -4,5 +4,6 @@ import pb from "../pocketbase";
 export const chats = pb.collection("chats");
 
 export interface ChatModel extends RecordModel {
-    members: string[];
+	members: string[];
+	photo: string;
 }

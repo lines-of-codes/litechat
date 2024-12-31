@@ -1,22 +1,26 @@
 {
-  "name": "litechat",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
-  },
-  "devDependencies": {
-    "typescript": "~5.7.2",
-    "vite": "^6.0.6"
-  },
-  "packageManager": "pnpm@10.0.0-rc.0+sha256.57703626082eb6cde4a0eddd7a406172265c8509b6442396dbcc513eef3d0841",
-  "dependencies": {
-    "@types/mithril": "^2.2.7",
-    "bootstrap-icons": "^1.11.3",
-    "mithril": "^2.2.12",
-    "pocketbase": "^0.23.0"
-  }
+    "name": "litechat",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc && vite build",
+        "preview": "vite preview"
+    },
+    "devDependencies": {
+        "@types/mithril": "^2.2.7",
+        "@types/sanitize-html": "^2.13.0",
+        "less": "^4.2.1",
+        "typescript": "~5.7.2",
+        "vite": "^6.0.6"
+    },
+    "packageManager": "pnpm@10.0.0-rc.0+sha256.57703626082eb6cde4a0eddd7a406172265c8509b6442396dbcc513eef3d0841",
+    "dependencies": {
+        "bootstrap-icons": "^1.11.3",
+        "marked": "^15.0.4",
+        "mithril": "^2.2.12",
+        "pocketbase": "^0.23.0",
+        "sanitize-html": "^2.14.0"
+    }
 }

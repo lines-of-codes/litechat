@@ -3,22 +3,25 @@ import type { Component } from "mithril";
 import NavBar from "../components/navbar";
 import { ChatModel, chats } from "../collections/chats";
 import { pbMithrilFetch } from "../utils/pbMithril";
-import { UserModel } from "../collections/users";
+import type { UserModel } from "../collections/users";
 import pb from "../pocketbase";
-import { KeyExchangeModel, keyExchanges } from "../collections/keyexchanges";
-import { arrayBufferToBase64, base64ToArrayBuffer } from "../utils/base64";
-import { ASYMMETRIC_KEY_ALG, getKey, SYMMETRIC_KEY_ALG } from "../crypto";
+import { base64ToArrayBuffer } from "../utils/base64";
+import { SYMMETRIC_KEY_ALG } from "../crypto";
 import { MessageModel, messages } from "../collections/messages";
 import { ListResult, RecordSubscription } from "pocketbase";
-
-interface ChatMessage {
-	id: string;
-	sender: string;
-	senderId: string;
-	content: string;
-	attachments: string[];
-	created: string;
-}
+import {
+	encryptMessage,
+	generateChatName,
+	getChatOrUserAvatar,
+	getSymmetricKey,
+} from "../utils/chatUtils";
+import sanitizeHtml from "sanitize-html";
+import { marked } from "marked";
+import Message, {
+	MessageComponentAttrs,
+	MessageComponentState,
+} from "../components/message";
+import { ChatMessage } from "../interfaces/chatMessage";
 
 const notificationSound = new Audio("/notification.flac");
 
@@ -27,80 +30,20 @@ let thisUser: UserModel | null = pb.authStore.record as UserModel | null;
 let thisUserId: string = "";
 let chatInfo: ChatModel;
 let recipient: UserModel;
-let recipients: { [key: string]: UserModel };
-let symmetricKey: CryptoKey;
+let recipients: { [key: string]: UserModel } = {};
+let symmetricKey: CryptoKey | undefined = undefined;
 let messageList: ChatMessage[] = [];
 let message: string = "";
 
-/// Returns true if succeed. false if failed.
-async function getSymmetricKey(
-	sender: string,
-	receiver: string
-): Promise<boolean> {
-	let keyText = localStorage.getItem(`chat_${chatId}`);
-
-	if (keyText === null) {
-		const privateKey = await getKey();
-
-		if (privateKey === null) {
-			window.location.href = "#!/importPrivateKey";
-			return false;
-		}
-
-		const keyExchange = (await keyExchanges.getFirstListItem(
-			`chat.id='${chatId}' && sender.id='${sender}' && receiver='${receiver}'`
-		)) as KeyExchangeModel;
-		const key = await crypto.subtle.decrypt(
-			{ name: ASYMMETRIC_KEY_ALG },
-			privateKey,
-			base64ToArrayBuffer(keyExchange.key)
-		);
-		const decoder = new TextDecoder();
-
-		keyText = decoder.decode(key);
-
-		localStorage.setItem(`chat_${chatId}`, keyText);
-	}
-
-	symmetricKey = await crypto.subtle.importKey(
-		"jwk",
-		JSON.parse(keyText),
-		{
-			name: SYMMETRIC_KEY_ALG,
-		},
-		true,
-		["encrypt", "decrypt"]
-	);
-	return true;
-}
-
-async function decryptMessage(str: string, iv: Uint8Array) {
+async function decryptMessage(str: string, iv: Uint8Array, key: CryptoKey) {
 	const decoder = new TextDecoder();
 	return decoder.decode(
 		await crypto.subtle.decrypt(
 			{ name: SYMMETRIC_KEY_ALG, iv },
-			symmetricKey,
+			key,
 			base64ToArrayBuffer(str)
 		)
 	);
-}
-
-async function encryptMessage(str: string) {
-	const encoder = new TextEncoder();
-	const iv = crypto.getRandomValues(new Uint8Array(12));
-	return {
-		result: arrayBufferToBase64(
-			await crypto.subtle.encrypt(
-				{
-					name: SYMMETRIC_KEY_ALG,
-					iv,
-				},
-				symmetricKey,
-				encoder.encode(str)
-			)
-		),
-		iv,
-	};
 }
 
 function ivFromJson(str: string) {
@@ -109,9 +52,11 @@ function ivFromJson(str: string) {
 	return new Uint8Array(arr);
 }
 
-function formatDate(str: string) {
-	const date = new Date(str);
-	return `Sent on ${date.toLocaleString()}`;
+/// Parse Markdown and sanitize output
+async function processMessage(input: string) {
+	return sanitizeHtml(await marked.parse(input), {
+		disallowedTagsMode: "escape",
+	});
 }
 
 async function initChatInfo() {
@@ -133,11 +78,17 @@ async function initChatInfo() {
 
 	recipient = otherMembers[0];
 
-	const keyFetchResult = await getSymmetricKey(recipient.id, thisUserId);
+	const keyFetchResult = await getSymmetricKey(
+		recipient.id,
+		thisUserId,
+		chatId
+	);
 
-	if (!keyFetchResult) {
+	if (keyFetchResult === null) {
 		return;
 	}
+
+	symmetricKey = keyFetchResult;
 
 	const result = (await messages.getList(1, 25, {
 		sort: "created",
@@ -146,11 +97,22 @@ async function initChatInfo() {
 
 	messageList = await Promise.all(
 		result.items.map(async (msg) => {
+			let rawContent = await decryptMessage(
+				msg.content,
+				ivFromJson(msg.iv),
+				keyFetchResult
+			);
+			const processedMessage = await processMessage(rawContent);
+
+			// Needs to be done because Mithril.js and contentEditable is weird
+			rawContent = rawContent.replaceAll("\n", "<br>");
+
 			return {
 				id: msg.id,
 				senderId: msg.sender,
 				sender: recipients[msg.sender].name,
-				content: await decryptMessage(msg.content, ivFromJson(msg.iv)),
+				rawContent,
+				content: processedMessage,
 				attachments: msg.attachments,
 				created: msg.created,
 			};
@@ -161,9 +123,9 @@ async function initChatInfo() {
 }
 
 async function sendMessage() {
-	if (thisUser === undefined) return;
+	if (thisUser === null || symmetricKey === undefined) return;
 
-	const encrypted = await encryptMessage(message);
+	const encrypted = await encryptMessage(message, symmetricKey);
 
 	messages.create({
 		sender: thisUserId,
@@ -172,7 +134,18 @@ async function sendMessage() {
 		iv: JSON.stringify(encrypted.iv),
 	} as MessageModel);
 
-	(document.getElementById("messageEntry") as HTMLInputElement).value = "";
+	(document.getElementById("messageEntry") as HTMLElement).innerText = "";
+}
+
+async function updateMessage(id: string, newContent: string) {
+	if (thisUser === null || symmetricKey === undefined) return;
+
+	const encrypted = await encryptMessage(newContent, symmetricKey);
+
+	await messages.update(id, {
+		content: encrypted.result,
+		iv: JSON.stringify(encrypted.iv),
+	});
 }
 
 const Chat = {
@@ -186,6 +159,10 @@ const Chat = {
 		thisUserId = authRecord.id;
 
 		initChatInfo();
+
+		marked.use({
+			breaks: true,
+		});
 	},
 	oncreate: async () => {
 		messages.subscribe(
@@ -193,15 +170,28 @@ const Chat = {
 			async (data: RecordSubscription<MessageModel>) => {
 				switch (data.action) {
 					case "create":
-						if (data.record.chat === chatId) {
+						if (
+							data.record.chat === chatId &&
+							symmetricKey !== undefined
+						) {
+							let rawContent = await decryptMessage(
+								data.record.content,
+								ivFromJson(data.record.iv),
+								symmetricKey
+							);
+							const processedMessage = await processMessage(
+								rawContent
+							);
+
+							// Needs to be done because Mithril.js and contentEditable is weird
+							rawContent = rawContent.replaceAll("\n", "<br>");
+
 							messageList.push({
 								id: data.record.id,
 								senderId: data.record.sender,
 								sender: recipients[data.record.sender].name,
-								content: await decryptMessage(
-									data.record.content,
-									ivFromJson(data.record.iv)
-								),
+								rawContent,
+								content: processedMessage,
 								attachments: data.record.attachments,
 								created: data.record.created,
 							});
@@ -210,18 +200,27 @@ const Chat = {
 						if (data.record.sender != thisUser?.id) {
 							notificationSound.play();
 						}
-
 						break;
 					case "update":
 						const targetMsgIndex = messageList.findIndex(
 							(v) => v.id === data.record.id
 						);
-						if (targetMsgIndex === -1) return;
-						messageList[targetMsgIndex].content =
-							await decryptMessage(
-								data.record.content,
-								ivFromJson(data.record.iv)
-							);
+						if (targetMsgIndex === -1 || symmetricKey === undefined)
+							return;
+						let rawContent = await decryptMessage(
+							data.record.content,
+							ivFromJson(data.record.iv),
+							symmetricKey
+						);
+						const processedMessage = await processMessage(
+							rawContent
+						);
+
+						// Needs to be done because Mithril.js and contentEditable is weird
+						rawContent = rawContent.replaceAll("\n", "<br>");
+
+						messageList[targetMsgIndex].rawContent = rawContent;
+						messageList[targetMsgIndex].content = processedMessage;
 						break;
 					case "delete":
 						messageList = messageList.filter(
@@ -229,11 +228,17 @@ const Chat = {
 						);
 						break;
 				}
+
 				m.redraw();
 			}
 		);
 	},
 	onupdate() {
+		let messageList = document.getElementById("messageList");
+		if (messageList !== null) {
+			messageList.scrollTo(0, messageList.scrollHeight);
+		}
+
 		let newId = m.route.param("id");
 		if (newId === chatId) return;
 
@@ -244,88 +249,63 @@ const Chat = {
 		messages.unsubscribe();
 	},
 	view: () => {
+		const chatPhoto = getChatOrUserAvatar(
+			chatInfo,
+			Object.values(recipients)
+		);
+		const chatName = generateChatName(recipients, thisUserId);
+
 		return m("#pagecontainer.grid.chat-split.gap-2.h-90vh", [
 			m(NavBar),
-			recipient === undefined
-				? null
-				: m("main#chatarea", [
-						m("header.flex.gap-2.items-center#chatHeader", [
-							recipient.avatar === ""
-								? null
-								: m("img.rounded", {
-										src: pb.files.getURL(
-											recipient,
-											recipient.avatar
-										),
-										height: 29.5,
-										alt: `${recipient.name}'s avatar`,
-								  }),
-							m("span", recipient.name),
-						]),
-						m(
-							"div#messageList",
-							messageList.map((msg) => {
-								return m("div.message", [
-									m(".content", [
-										m("div.senderName.gap-2", [
-											msg.sender,
-											m(
-												"span.secondary",
-												formatDate(msg.created)
-											),
-										]),
-										m("div.content", msg.content),
-									]),
-									m(".actions", [
-										msg.senderId === thisUserId
-											? m(
-													"button.iconbutton.md",
-													{
-														onclick() {
-															messages.delete(
-																msg.id
-															);
-														},
-													},
-													[
-														m.trust(
-															`<i class="bi bi-trash"></i>`
-														),
-													]
-											  )
-											: null,
-									]),
-								]);
-							})
-						),
-						m(".flex.gap-2#messageForm", [
-							m("input[type=text]#messageEntry", {
-								placeholder: "Enter your message...",
-								onchange: (event: Event) => {
-									const target =
-										event.target as HTMLInputElement;
-									message = target.value;
+			m("main#chatarea", [
+				m("header.flex.gap-2.items-center#chatHeader", [
+					chatPhoto === ""
+						? null
+						: m("img.rounded", {
+								src: chatPhoto,
+								alt: `${chatName}'s chat photo`,
+								height: 29.5,
+						  }),
+					m("span", chatName),
+				]),
+				m(
+					"div#messageList",
+					messageList.map((msg) => {
+						return m<MessageComponentAttrs, MessageComponentState>(
+							Message,
+							{
+								msg: msg,
+								updateFunc(newContent) {
+									return updateMessage(msg.id, newContent);
 								},
-								onkeydown(event: KeyboardEvent) {
-									if (event.code === "Enter") {
-										message = (
-											document.getElementById(
-												"messageEntry"
-											) as HTMLInputElement
-										).value;
-										sendMessage();
-									}
-								},
-							}),
-							m(
-								"button.button#sendButton",
-								{
-									onclick: sendMessage,
-								},
-								[m.trust(`<i class="bi bi-send-fill"></i>`)]
-							),
-						]),
-				  ]),
+							}
+						);
+					})
+				),
+				m(".flex.gap-2#messageForm", [
+					m("#messageEntry[contenteditable=true]", {
+						placeholder: "Enter your message...",
+						oninput: (event: Event) => {
+							const target = event.target as HTMLElement;
+							message = target.innerText;
+						},
+						onkeydown(event: KeyboardEvent) {
+							if (event.code === "Enter" && !event.shiftKey) {
+								if (message.trim() === "") return;
+								sendMessage();
+							}
+						},
+					}),
+					m(
+						"button.button#sendButton",
+						{
+							disabled: message.trim() === "",
+							onclick: sendMessage,
+						},
+						[m.trust(`<i class="bi bi-send-fill"></i>`)]
+					),
+				]),
+			]),
 		]);
 	},
 } as Component;

@@ -4,6 +4,7 @@ import pb from "../pocketbase";
 import { UserModel } from "../collections/users";
 import { ChatModel, chats } from "../collections/chats";
 import { pbMithrilFetch } from "../utils/pbMithril";
+import { generateChatName, getChatOrUserAvatar } from "../utils/chatUtils";
 
 /*
 <nav class="flex flex-col space-between">
@@ -35,11 +36,13 @@ import { pbMithrilFetch } from "../utils/pbMithril";
 let profileButtonHover = false;
 let chatRecipients: Array<{
 	chat: ChatModel;
-	receiver: UserModel;
+	recipients: UserModel[];
 }>;
+let thisUserId: string | undefined;
 
 const NavBar = {
 	oninit: async () => {
+		thisUserId = pb.authStore.record?.id;
 		chatRecipients = (
 			await chats.getList(1, 50, {
 				expand: "members",
@@ -47,17 +50,9 @@ const NavBar = {
 				fetch: pbMithrilFetch,
 			})
 		).items.map((value) => {
-			const otherMembers = (value.expand?.members as UserModel[]).filter(
-				(value) => {
-					return value.id != pb.authStore.record?.id;
-				}
-			);
-			if (otherMembers.length == 0) {
-				window.location.href = "#!/chat";
-			}
 			return {
 				chat: value as ChatModel,
-				receiver: otherMembers[0],
+				recipients: value.expand?.members,
 			};
 		});
 	},
@@ -122,9 +117,13 @@ const NavBar = {
 					chatRecipients === undefined
 						? null
 						: chatRecipients.map((value) => {
-								const avatarUrl = pb.files.getURL(
-									value.receiver,
-									value.receiver.avatar
+								let chatName = generateChatName(
+									value.recipients,
+									thisUserId
+								);
+								let avatarUrl: string = getChatOrUserAvatar(
+									value.chat,
+									value.recipients
 								);
 
 								return m(
@@ -134,22 +133,19 @@ const NavBar = {
 										params: {
 											id: value.chat.id,
 										},
-										selector: "a.cleanlink",
+										selector:
+											"a.cleanlink.list-tile.button.flex.gap-2.items-center",
 									},
 									[
-										m(
-											"li.list-tile.button.flex.gap-2.items-center",
-											[
-												avatarUrl === ""
-													? null
-													: m("img.rounded", {
-															src: avatarUrl,
-															alt: `${value.receiver.name}'s avatar`,
-															height: "24",
-													  }),
-												m("span", value.receiver.name),
-											]
-										),
+										avatarUrl === ""
+											? null
+											: m("img.rounded", {
+													src: avatarUrl,
+													alt: `${chatName}'s chat picture`,
+													height: "24",
+											  }),
+										m("span.chatName", chatName),
+										,
 									]
 								);
 						  })
