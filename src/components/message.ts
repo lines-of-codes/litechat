@@ -9,7 +9,21 @@ let thisUser: UserModel | null = pb.authStore.record as UserModel | null;
 
 function formatDate(str: string) {
 	const date = new Date(str);
-	return `Sent on ${date.toLocaleString()}`;
+	const now = new Date(Date.now());
+	if (date.getDate() === now.getDate()) {
+		return `Today, ${date.toLocaleTimeString(undefined, {
+			hour: "numeric",
+			minute: "numeric",
+		})}`;
+	}
+
+	return date.toLocaleString(undefined, {
+		year: "numeric",
+		month: "numeric",
+		day: "numeric",
+		hour: "numeric",
+		minute: "numeric",
+	});
 }
 
 export type MessageComponentAttrs = {

@@ -255,18 +255,27 @@ const Chat = {
 		);
 		const chatName = generateChatName(recipients, thisUserId);
 
-		return m("#pagecontainer.grid.chat-split.gap-2.h-90vh", [
+		return m("#pagecontainer.chat", [
 			m(NavBar),
 			m("main#chatarea", [
-				m("header.flex.gap-2.items-center#chatHeader", [
-					chatPhoto === ""
-						? null
-						: m("img.rounded", {
-								src: chatPhoto,
-								alt: `${chatName}'s chat photo`,
-								height: 29.5,
-						  }),
-					m("span", chatName),
+				m("div.flex.gap-2", [
+					m(
+						"a.cleanlink.iconbutton.md#chatBackBtn",
+						{
+							href: "#!/chat",
+						},
+						m.trust(`<i class="bi bi-chevron-left"></i>`)
+					),
+					m("header.flex.gap-2.items-center#chatHeader", [
+						chatPhoto === ""
+							? null
+							: m("img.rounded", {
+									src: chatPhoto,
+									alt: `${chatName}'s chat photo`,
+									height: 29.5,
+							  }),
+						m("span", chatName),
+					]),
 				]),
 				m(
 					"div#messageList",

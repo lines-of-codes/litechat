@@ -53,7 +53,7 @@ const ManageAccount = {
 	view() {
 		return m("[", [
 			m("header#pageheader", [m("h1", "Manage Account")]),
-			m("main.grid.equal-split#pagecontainer", [
+			m("main.grid.gap-4.equal-split#pagecontainer", [
 				m("#left.flex.flex-col.gap-4.items-start", [
 					m(
 						"a.button",
