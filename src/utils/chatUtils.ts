@@ -44,7 +44,6 @@ export function getChatOrUserAvatar(chat: ChatModel, recipients: UserModel[]) {
 
 /// Returns a CryptoKey if succeed, null if failed.
 export async function getSymmetricKey(
-	sender: string,
 	receiver: string,
 	chatId: string
 ): Promise<CryptoKey | null> {
@@ -58,17 +57,38 @@ export async function getSymmetricKey(
 			return null;
 		}
 
-		const keyExchange = (await keyExchanges.getFirstListItem(
-			`chat.id='${chatId}' && sender.id='${sender}' && receiver='${receiver}'`
-		)) as KeyExchangeModel;
-		const key = await crypto.subtle.decrypt(
-			{ name: ASYMMETRIC_KEY_ALG },
-			privateKey,
-			base64ToArrayBuffer(keyExchange.key)
-		);
-		const decoder = new TextDecoder();
+		let keyExchange;
 
-		keyText = decoder.decode(key);
+		try {
+			keyExchange = (await keyExchanges.getFirstListItem(
+				`chat.id='${chatId}' && receiver='${receiver}'`,
+				{
+					fields: "key",
+				}
+			)) as KeyExchangeModel;
+
+			const key = await crypto.subtle.decrypt(
+				{ name: ASYMMETRIC_KEY_ALG },
+				privateKey,
+				base64ToArrayBuffer(keyExchange.key)
+			);
+			const decoder = new TextDecoder();
+
+			keyText = decoder.decode(key);
+		} catch (err) {
+			console.error("An error occurred while fetching key exchanges.");
+			console.error(err);
+
+			let answer = prompt(
+				"We do not have the encryption key to this chat. If you do have a backup key, please enter it below."
+			);
+
+			if (answer === null || answer.trim() === "") {
+				return null;
+			}
+
+			keyText = answer;
+		}
 
 		localStorage.setItem(`chat_${chatId}`, keyText);
 	}

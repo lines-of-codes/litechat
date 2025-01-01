@@ -1,11 +1,17 @@
 @import "colors.less";
 
 :root {
+	--color-50: @slate-50;
+	--color-600: @slate-600;
+	--color-700: @slate-700;
+	--color-800: @slate-800;
+	--color-900: @slate-900;
+
 	font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
 	font-weight: 400;
 
 	color-scheme: dark;
-	color: rgba(255, 255, 255, 0.87);
+	color: var(--color-50);
 
 	font-synthesis: none;
 	text-rendering: optimizeLegibility;
@@ -19,6 +25,7 @@ input[type="file"] {
 
 .cleanlink {
 	color: inherit;
+	text-decoration: none;
 }
 
 .cleanlink:hover {
@@ -27,8 +34,9 @@ input[type="file"] {
 
 a {
 	font-weight: 500;
-	color: @sky-500;
-	text-decoration: inherit;
+	// color: @sky-500;
+	color: var(--color-50);
+	text-decoration: underline;
 	transition: color 250ms;
 }
 
@@ -44,7 +52,11 @@ h3 {
 
 body {
 	margin: 0;
-	background-image: linear-gradient(45deg, @slate-900, @slate-700);
+	background-image: linear-gradient(
+		45deg,
+		var(--color-900),
+		var(--color-800)
+	);
 }
 
 html,
@@ -52,15 +64,16 @@ body {
 	height: 100%;
 }
 
-#pagecontainer {
+#pagecontainer,
+.container {
 	padding: 5vh 5vw;
-}
 
-#pagecontainer.flex-center {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	min-height: 90vh;
+	&.flex-center {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		min-height: 90vh;
+	}
 }
 
 .h-90vh {
@@ -75,11 +88,16 @@ body {
 	grid-template-columns: 1fr 1fr;
 }
 
+/* Designed for use with a single-page content with a header and a footer. */
+.grid.wide-content {
+	grid-template-rows: auto 1fr auto;
+}
+
 #pageheader {
 	text-align: center;
 	padding: 5vh 0;
-	background: #213547;
-	border-bottom: 1px solid #475569;
+	background: var(--color-900);
+	border-bottom: 1px solid var(--color-700);
 }
 
 #navheader {
@@ -92,7 +110,7 @@ body {
 	outline: none;
 	padding: 0 7px;
 	border-radius: 5px;
-	background-color: @slate-700;
+	background-color: var(--color-700);
 	border: 1px solid transparent;
 	transition: border-color 250ms;
 	display: flex;
@@ -116,14 +134,13 @@ a.button {
 	font-size: 1em;
 	font-weight: 500;
 	font-family: inherit;
-	// background-color: #1a1a1a;
-	background-color: @slate-700;
+	background-color: var(--color-700);
 	cursor: pointer;
 	transition: border-color 0.25s;
 
 	&.active {
-		background: linear-gradient(to top, #213547, #1a1a1a);
-		border-color: #213547;
+		background: linear-gradient(to top, var(--color-900), var(--color-700));
+		border-color: var(--color-800);
 
 		&:focus {
 			.button.active:focus {
@@ -175,7 +192,7 @@ a.button {
 
 .iconbutton:hover,
 .button:hover {
-	border-color: #646cff;
+	border-color: var(--color-600);
 }
 
 .iconbutton:focus,
@@ -187,7 +204,7 @@ a.button {
 input[type="text"],
 textarea,
 [contenteditable="true"] {
-	background-color: #475569;
+	background-color: var(--color-600);
 	color: inherit;
 	border: none;
 	outline: none;
@@ -206,6 +223,16 @@ textarea:focus {
 	text-align: left;
 }
 
+.text-center {
+	text-align: center;
+}
+
 p {
 	margin: 0;
+}
+
+@media print {
+	.exclude-printing {
+		display: none;
+	}
 }

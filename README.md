@@ -19,6 +19,10 @@ When starting a conversation:
 
 The symmetric key can be rotated when requested, but older chat messages will also be lost.
 
+> [!NOTE]
+> As of current and initial plans, Only message content and attachments will be encrypted.
+> So your profile picture, display name, chat name, chat photo are not encrypted.
+
 ## Dependencies
 
 -   PocketBase: A lightweight database software

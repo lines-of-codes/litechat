@@ -15,13 +15,14 @@ import {
 	getChatOrUserAvatar,
 	getSymmetricKey,
 } from "../utils/chatUtils";
-import sanitizeHtml from "sanitize-html";
 import { marked } from "marked";
 import Message, {
 	MessageComponentAttrs,
 	MessageComponentState,
 } from "../components/message";
 import { ChatMessage } from "../interfaces/chatMessage";
+import DOMPurify from "dompurify";
+import { fetchAndApplyTheme } from "../themes/colorTheme";
 
 const notificationSound = new Audio("/notification.flac");
 
@@ -29,11 +30,12 @@ let chatId: string = "";
 let thisUser: UserModel | null = pb.authStore.record as UserModel | null;
 let thisUserId: string = "";
 let chatInfo: ChatModel;
-let recipient: UserModel;
 let recipients: { [key: string]: UserModel } = {};
 let symmetricKey: CryptoKey | undefined = undefined;
 let messageList: ChatMessage[] = [];
 let message: string = "";
+let chatPhoto: string = "";
+let chatName: string = "";
 
 async function decryptMessage(str: string, iv: Uint8Array, key: CryptoKey) {
 	const decoder = new TextDecoder();
@@ -54,9 +56,7 @@ function ivFromJson(str: string) {
 
 /// Parse Markdown and sanitize output
 async function processMessage(input: string) {
-	return sanitizeHtml(await marked.parse(input), {
-		disallowedTagsMode: "escape",
-	});
+	return DOMPurify.sanitize(await marked.parse(input));
 }
 
 async function initChatInfo() {
@@ -76,13 +76,7 @@ async function initChatInfo() {
 		window.location.href = "#!/chat";
 	}
 
-	recipient = otherMembers[0];
-
-	const keyFetchResult = await getSymmetricKey(
-		recipient.id,
-		thisUserId,
-		chatId
-	);
+	const keyFetchResult = await getSymmetricKey(thisUserId, chatId);
 
 	if (keyFetchResult === null) {
 		return;
@@ -118,6 +112,20 @@ async function initChatInfo() {
 			};
 		})
 	);
+
+	chatPhoto = getChatOrUserAvatar(chatInfo, Object.values(recipients));
+	chatName =
+		chatInfo.name.trim() === ""
+			? generateChatName(recipients, thisUserId)
+			: chatInfo.name;
+
+	let theme = chatInfo.theme;
+
+	if (chatInfo.theme === "") {
+		theme = "slate";
+	}
+
+	fetchAndApplyTheme(theme);
 
 	m.redraw();
 }
@@ -249,12 +257,6 @@ const Chat = {
 		messages.unsubscribe();
 	},
 	view: () => {
-		const chatPhoto = getChatOrUserAvatar(
-			chatInfo,
-			Object.values(recipients)
-		);
-		const chatName = generateChatName(recipients, thisUserId);
-
 		return m("#pagecontainer.chat", [
 			m(NavBar),
 			m("main#chatarea", [
@@ -276,6 +278,13 @@ const Chat = {
 							  }),
 						m("span", chatName),
 					]),
+					m(
+						"a.cleanlink.iconbutton.md#chatSettings",
+						{
+							href: `#!/chat/${chatId}/settings`,
+						},
+						m.trust(`<i class="bi bi-info-circle-fill"></i>`)
+					),
 				]),
 				m(
 					"div#messageList",
@@ -300,7 +309,8 @@ const Chat = {
 						},
 						onkeydown(event: KeyboardEvent) {
 							if (event.code === "Enter" && !event.shiftKey) {
-								if (message.trim() === "") return;
+								if (DOMPurify.sanitize(message.trim()) === "")
+									return;
 								sendMessage();
 							}
 						},
@@ -308,7 +318,7 @@ const Chat = {
 					m(
 						"button.button#sendButton",
 						{
-							disabled: message.trim() === "",
+							disabled: DOMPurify.sanitize(message.trim()) === "",
 							onclick: sendMessage,
 						},
 						[m.trust(`<i class="bi bi-send-fill"></i>`)]

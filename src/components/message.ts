@@ -10,11 +10,17 @@ let thisUser: UserModel | null = pb.authStore.record as UserModel | null;
 function formatDate(str: string) {
 	const date = new Date(str);
 	const now = new Date(Date.now());
+	const time = date.toLocaleTimeString(undefined, {
+		hour: "numeric",
+		minute: "numeric",
+	});
+
 	if (date.getDate() === now.getDate()) {
-		return `Today, ${date.toLocaleTimeString(undefined, {
-			hour: "numeric",
-			minute: "numeric",
-		})}`;
+		return `Today, ${time}`;
+	}
+
+	if (date.getDate() === now.getDate() - 1) {
+		return `Yesterday, ${time}`;
 	}
 
 	return date.toLocaleString(undefined, {

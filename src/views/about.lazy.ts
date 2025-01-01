@@ -21,7 +21,7 @@ const AboutPage = {
 					},
 					[
 						m(
-							"a.button",
+							"a.cleanlink.button",
 							{
 								href: "#!/chat",
 							},

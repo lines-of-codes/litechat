@@ -861,6 +861,20 @@
         "type": "file"
       },
       {
+        "autogeneratePattern": "",
+        "hidden": false,
+        "id": "text2541086472",
+        "max": 0,
+        "min": 0,
+        "name": "theme",
+        "pattern": "",
+        "presentable": false,
+        "primaryKey": false,
+        "required": false,
+        "system": false,
+        "type": "text"
+      },
+      {
         "hidden": false,
         "id": "autodate2990389176",
         "name": "created",

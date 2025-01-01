@@ -117,10 +117,13 @@ const NavBar = {
 					chatRecipients === undefined
 						? null
 						: chatRecipients.map((value) => {
-								let chatName = generateChatName(
-									value.recipients,
-									thisUserId
-								);
+								let chatName =
+									value.chat.name === ""
+										? generateChatName(
+												value.recipients,
+												thisUserId
+										  )
+										: value.chat.name;
 								let avatarUrl: string = getChatOrUserAvatar(
 									value.chat,
 									value.recipients
@@ -173,6 +176,7 @@ const NavBar = {
 										authRecord,
 										authRecord.avatar
 									),
+									alt: "Your profile picture",
 									width: "32px",
 							  }),
 						m("strong", authRecord.name),

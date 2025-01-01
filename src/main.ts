@@ -32,10 +32,12 @@ if (authRecord !== null) {
 	m.route(document.body, "/chat", {
 		"/chat": NoChat,
 		"/chat/:id": Chat,
+		"/chat/:id/settings": LazyView("chatSettings"),
 		"/newchat": NewChat,
 		"/manageAccount": LazyView("manageAccount"),
 		"/about": LazyView("about"),
 		"/importPrivateKey": LazyView("importPrivateKey"),
+		"/exportPrivateKey": LazyView("exportPrivateKey"),
 	});
 
 	if (authRecord.name === "") {

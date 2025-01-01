@@ -187,6 +187,7 @@ const NewChat = {
 			m(
 				"button.button",
 				{
+					disabled: selectedUsers.length < 2,
 					onclick() {
 						createChat(selectedUsers);
 					},

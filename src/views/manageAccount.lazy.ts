@@ -3,7 +3,6 @@ import m from "mithril";
 import pb from "../pocketbase";
 import { UserModel } from "../collections/users";
 import { users } from "../auth";
-import { getKey } from "../crypto";
 
 /*
 <header id="pageheader">
@@ -51,7 +50,7 @@ const ManageAccount = {
 		email = authRecord.email;
 	},
 	view() {
-		return m("[", [
+		return m(".grid.wide-content", [
 			m("header#pageheader", [m("h1", "Manage Account")]),
 			m("main.grid.gap-4.equal-split#pagecontainer", [
 				m("#left.flex.flex-col.gap-4.items-start", [
@@ -74,7 +73,6 @@ const ManageAccount = {
 									.value;
 								displayName = name;
 								formData.set("name", name);
-								console.log(name);
 							},
 						}),
 					]),
@@ -94,16 +92,6 @@ const ManageAccount = {
 							},
 						}),
 					]),
-					m(
-						"button.button",
-						{
-							async onclick() {
-								await users.update(authRecord.id, formData);
-								window.location.href = "#!/";
-							},
-						},
-						"Save changes"
-					),
 				]),
 				m("#right.flex.flex-col.gap-4.items-start", [
 					m("#avatar.flex.flex-col.gap-2.items-start", [
@@ -119,7 +107,6 @@ const ManageAccount = {
 							"label.button",
 							{
 								for: "avatarFile",
-								onclick() {},
 							},
 							"Pick File"
 						),
@@ -150,27 +137,24 @@ const ManageAccount = {
 						"button.button#exportPrivateKey",
 						{
 							async onclick() {
-								const privKey = await getKey();
-
-								if (privKey === null) {
-									alert("You do not have a private key. 😔");
-									return;
-								}
-
-								await navigator.clipboard.writeText(
-									JSON.stringify(
-										await crypto.subtle.exportKey(
-											"jwk",
-											privKey
-										)
-									)
-								);
-								alert("Copied!");
+								window.location.href = "#!/exportPrivateKey";
 							},
 						},
 						"Export Private Key"
 					),
 				]),
+			]),
+			m("div.container", [
+				m(
+					"button.button",
+					{
+						async onclick() {
+							await users.update(authRecord.id, formData);
+							window.location.href = "#!/";
+						},
+					},
+					"Save changes"
+				),
 			]),
 		]);
 	},

@@ -5,5 +5,7 @@ export const chats = pb.collection("chats");
 
 export interface ChatModel extends RecordModel {
 	members: string[];
+	name: string;
 	photo: string;
+	theme: string;
 }
