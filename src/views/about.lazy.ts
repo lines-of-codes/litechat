@@ -31,7 +31,18 @@ const AboutPage = {
 				),
 				m(
 					"p",
-					`litechat is a chat application designed to be lightweight, fast, and secure. Open-source under the GPLv3 license.`
+          [
+					  "litechat is a chat application designed to be lightweight, fast, and secure.",
+            "Open-source under the GPLv3 license.",
+            m("br"),
+            m(
+              "a", 
+              {
+                href: "/terms.html"
+              }, 
+              "Terms and Conditions"
+            ),
+          ]
 				),
 				m("div", [
 					m("strong", "Notification sound"),
