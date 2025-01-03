@@ -793,7 +793,7 @@
     "viewRule": "members.id ?~ @request.auth.id",
     "createRule": "@request.body.members.id ?~ @request.auth.id",
     "updateRule": "members.id ?~ @request.auth.id",
-    "deleteRule": null,
+    "deleteRule": "members.id ?~ @request.auth.id && members:length = 1",
     "name": "chats",
     "type": "base",
     "fields": [
@@ -812,11 +812,11 @@
         "type": "text"
       },
       {
-        "cascadeDelete": false,
+        "cascadeDelete": true,
         "collectionId": "_pb_users_auth_",
         "hidden": false,
         "id": "relation1168167679",
-        "maxSelect": 999,
+        "maxSelect": 100,
         "minSelect": 0,
         "name": "members",
         "presentable": false,
@@ -931,12 +931,12 @@
         "minSelect": 0,
         "name": "chat",
         "presentable": false,
-        "required": false,
+        "required": true,
         "system": false,
         "type": "relation"
       },
       {
-        "cascadeDelete": false,
+        "cascadeDelete": true,
         "collectionId": "_pb_users_auth_",
         "hidden": false,
         "id": "relation1593854671",
@@ -949,7 +949,7 @@
         "type": "relation"
       },
       {
-        "cascadeDelete": false,
+        "cascadeDelete": true,
         "collectionId": "_pb_users_auth_",
         "hidden": false,
         "id": "relation1035504790",
@@ -981,16 +981,6 @@
         "name": "created",
         "onCreate": true,
         "onUpdate": false,
-        "presentable": false,
-        "system": false,
-        "type": "autodate"
-      },
-      {
-        "hidden": false,
-        "id": "autodate3332085495",
-        "name": "updated",
-        "onCreate": true,
-        "onUpdate": true,
         "presentable": false,
         "system": false,
         "type": "autodate"
@@ -1032,7 +1022,7 @@
         "minSelect": 0,
         "name": "sender",
         "presentable": false,
-        "required": true,
+        "required": false,
         "system": false,
         "type": "relation"
       },
