@@ -55,7 +55,7 @@ const ManageAccount = {
 			m("main.grid.gap-4.equal-split#pagecontainer", [
 				m("#left.flex.flex-col.gap-4.items-start", [
 					m(
-						"a.button",
+						"a.cleanlink.button",
 						{
 							href: "#!/chat",
 						},
@@ -92,9 +92,29 @@ const ManageAccount = {
 							},
 						}),
 					]),
+					m(".flex.flex-col.gap-2.items-start#dangerous", [
+						m("h2", "Dangerous Actions"),
+						m(
+							"button.button.danger#deleteAccount",
+							{
+								async onclick() {
+									const answer = confirm(
+										`Are you sure you want to delete your account? 
+This action is irreversible and all of your data will be erased. 
+If you haven't done it already, you might want to backup your data first.`
+									);
+
+									if (!answer) return;
+
+									await users.delete(authRecord.id);
+								},
+							},
+							"Delete Account"
+						),
+					]),
 				]),
 				m("#right.flex.flex-col.gap-4.items-start", [
-					m("#avatar.flex.flex-col.gap-2.items-start", [
+					m("#avatar.flex.flex-col.gap-2.items-start#avatar", [
 						m("h2", "Avatar"),
 						avatar === ""
 							? null
@@ -126,22 +146,27 @@ const ManageAccount = {
 							},
 						}),
 					]),
-					m(
-						"a.cleanlink.button#importPrivateKey",
-						{
-							href: "#!/importPrivateKey",
-						},
-						"Import Private Key"
-					),
-					m(
-						"button.button#exportPrivateKey",
-						{
-							async onclick() {
-								window.location.href = "#!/exportPrivateKey";
+					m(".flex.flex-col.gap-2.items-start#privateKey", [
+						m("h2", "Your private key"),
+						m(
+							"p",
+							"Private keys are used to decrypt the chats sent to you."
+						),
+						m(
+							"a.cleanlink.button#importPrivateKey",
+							{
+								href: "#!/importPrivateKey",
 							},
-						},
-						"Export Private Key"
-					),
+							"Import Private Key"
+						),
+						m(
+							"a.cleanlink.button#exportPrivateKey",
+							{
+								href: "#!/exportPrivateKey",
+							},
+							"Export Private Key"
+						),
+					]),
 				]),
 			]),
 			m("div.container", [

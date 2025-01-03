@@ -2,17 +2,21 @@ import m from "mithril";
 import type { Component } from "mithril";
 import { users } from "../auth";
 import { UserModel } from "../collections/users";
-import pb from "../pocketbase";
+import pb, { thisUserId } from "../pocketbase";
 import { chats } from "../collections/chats";
 import { pbMithrilFetch } from "../utils/pbMithril";
-import { generateSymmetricKey } from "../crypto";
+import {
+	ASYMMETRIC_KEY_ALG,
+	ASYMMETRIC_KEY_HASH_ALG,
+	generateSymmetricKey,
+} from "../crypto";
 import { KeyExchangeModel, keyExchanges } from "../collections/keyexchanges";
 import { arrayBufferToBase64 } from "../utils/base64";
 import { ListResult } from "pocketbase";
+import SingleUserSelector from "../components/singleUserSelect";
 
 type Tab = "single" | "group";
 
-let thisUserId: string | undefined;
 let currentTab: Tab = "single";
 let userResults: ListResult<UserModel> | null = null;
 let selectedUsers: Array<UserModel> = [];
@@ -33,8 +37,8 @@ async function createChat(users: UserModel[]) {
 			"jwk",
 			JSON.parse(user.publicKey),
 			{
-				name: "RSA-OAEP",
-				hash: "SHA-256",
+				name: ASYMMETRIC_KEY_ALG,
+				hash: ASYMMETRIC_KEY_HASH_ALG,
 			} as RsaHashedImportParams,
 			true,
 			["encrypt"]
@@ -42,7 +46,7 @@ async function createChat(users: UserModel[]) {
 
 		const encryptedKey = await crypto.subtle.encrypt(
 			{
-				name: "RSA-OAEP",
+				name: ASYMMETRIC_KEY_ALG,
 			} as RsaOaepParams,
 			receiverKey,
 			new TextEncoder().encode(jwkKey)
@@ -62,50 +66,12 @@ async function createChat(users: UserModel[]) {
 }
 
 const NewChat = {
-	oninit() {
-		thisUserId = pb.authStore.record?.id;
-	},
 	view: () => {
-		const singleChat = m(".flex.flex-col.gap-2", [
-			m("input#idInput[type=text]", {
-				placeholder: "Enter your friend's ID or name",
-				onchange: async (event: Event) => {
-					let value = (event.target as HTMLInputElement).value;
-					userResults = (await users.getList(1, 15, {
-						fetch: pbMithrilFetch,
-						filter: `id = "${value}" || name ~ "${value}"`,
-					})) as ListResult<UserModel>;
-				},
-			}),
-			userResults === null
-				? null
-				: userResults.items.map((user) => {
-						if (user.id === thisUserId) return null;
-						return m(
-							"button.list-tile.button.flex.gap-2.items-center",
-							{
-								onclick: async () => {
-									await createChat([user]);
-								},
-							},
-							[
-								user.avatar === ""
-									? null
-									: m("img.rounded", {
-											src: pb.files.getURL(
-												user,
-												user.avatar
-											),
-											width: 32,
-									  }),
-								m("div", [
-									m("div", user?.name),
-									m("div.secondary", user?.id),
-								]),
-							]
-						);
-				  }),
-		]);
+		const singleChat = m(SingleUserSelector, {
+			async onUserSelected(user) {
+				await createChat([user]);
+			},
+		});
 
 		const groupChat = m(".flex.flex-col.gap-2", [
 			m("input#idInput[type=text]", {

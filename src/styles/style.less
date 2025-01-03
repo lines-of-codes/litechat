@@ -41,7 +41,7 @@ a {
 }
 
 a:hover {
-	color: @sky-600;
+	color: @sky-500;
 }
 
 h1,
@@ -55,7 +55,7 @@ body {
 	background-image: linear-gradient(
 		45deg,
 		var(--color-900),
-		var(--color-800)
+		var(--color-700)
 	);
 }
 
@@ -116,11 +116,11 @@ body {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-}
 
-.iconbutton.md {
-	font-size: 1em;
-	padding: 3px 10px;
+	&.md {
+		font-size: 1em;
+		padding: 3px 10px;
+	}
 }
 
 a.button {
@@ -136,7 +136,7 @@ a.button {
 	font-family: inherit;
 	background-color: var(--color-700);
 	cursor: pointer;
-	transition: border-color 0.25s;
+	transition: background-color 0.25s, border-color 0.25s;
 
 	&.active {
 		background: linear-gradient(to top, var(--color-900), var(--color-700));
@@ -148,6 +148,26 @@ a.button {
 			}
 		}
 	}
+
+	&.danger {
+		color: @rose-50;
+
+		&:hover:not([disabled]) {
+			background-color: @rose-900;
+			border-color: @rose-500;
+		}
+	}
+}
+
+.iconbutton:hover:not([disabled]),
+.button:hover:not([disabled]) {
+	border-color: var(--color-600);
+}
+
+.iconbutton:focus,
+.button:focus,
+.button:focus-visible {
+	outline: 4px auto #f0f0f0;
 }
 
 .flex {
@@ -156,6 +176,10 @@ a.button {
 
 .flex-col {
 	flex-direction: column;
+}
+
+.flex-wrap {
+	flex-wrap: wrap;
 }
 
 .gap-1 {
@@ -188,17 +212,6 @@ a.button {
 
 .rounded {
 	border-radius: 5px;
-}
-
-.iconbutton:hover,
-.button:hover {
-	border-color: var(--color-600);
-}
-
-.iconbutton:focus,
-.button:focus,
-.button:focus-visible {
-	outline: 4px auto #f0f0f0;
 }
 
 input[type="text"],

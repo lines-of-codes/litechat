@@ -6,43 +6,37 @@ import { ChatModel, chats } from "../collections/chats";
 import { pbMithrilFetch } from "../utils/pbMithril";
 import { generateChatName, getChatOrUserAvatar } from "../utils/chatUtils";
 
-/*
-<nav class="flex flex-col space-between">
-    <div id="sidebarStart" class="flex flex-col gap-2">
-        <div id="navheader">
-            <h1>litechat</h1>
-            <button class="iconbutton" style="padding-top: 3px;" popovertarget="headerMenuPopover">
-                <img src="/menu-meatballs-1.svg" />
-            </button>
-        </div>
-        <nav id="headerMenuPopover" popover>
-            <div>
-                <button class="button" id="manageAccBtn">Manage Account</button>
-                <button class="button" id="logoutBtn">Logout</button>
-            </div>
-        </nav>
-        <button class="list-tile button">
-            New chat
-        </button>
-        <ul id="chats">
-        </ul>
-    </div>
-    <div id="sidebarEnd">
-        <button class="button list-tile">Your profile</button>
-    </div>
-</nav>
- */
-
 let profileButtonHover = false;
 let chatRecipients: Array<{
 	chat: ChatModel;
 	recipients: UserModel[];
 }>;
-let thisUserId: string | undefined;
+
+async function discoveredNewChat(chat: ChatModel) {
+	// Empty by default, fetch additional user only when necessary
+	let recipients: UserModel[] = [];
+
+	if (chat.name === "" || chat.photo === "") {
+		const members = (
+			await chats.getOne(chat.id, {
+				expand: "members",
+				fields: "expand.members.id,expand.members.name,expand.members.avatar,expand.members.collectionName",
+			})
+		).expand?.members;
+
+		if (members !== undefined) {
+			recipients = members;
+		}
+	}
+
+	chatRecipients.push({
+		chat,
+		recipients,
+	});
+}
 
 const NavBar = {
 	oninit: async () => {
-		thisUserId = pb.authStore.record?.id;
 		chatRecipients = (
 			await chats.getList(1, 50, {
 				expand: "members",
@@ -55,6 +49,40 @@ const NavBar = {
 				recipients: value.expand?.members,
 			};
 		});
+
+		chats.subscribe("*", async (data) => {
+			let chat = data.record as ChatModel;
+
+			switch (data.action) {
+				case "create":
+					await discoveredNewChat(chat);
+					break;
+				case "update":
+					const updateTargetIndex = chatRecipients.findIndex(
+						(v) => v.chat.id === chat.id
+					);
+
+					if (updateTargetIndex === -1) {
+						await discoveredNewChat(chat);
+					} else {
+						chatRecipients[updateTargetIndex].chat = chat;
+					}
+					break;
+				case "delete":
+					const deleteTarget = chatRecipients.findIndex(
+						(v) => v.chat.id === chat.id
+					);
+
+					if (deleteTarget !== -1) {
+						chatRecipients.splice(deleteTarget, 1);
+					}
+					break;
+			}
+			m.redraw();
+		});
+	},
+	onremove() {
+		chats.unsubscribe("*");
 	},
 	view: () => {
 		const authRecord = pb.authStore.record as UserModel;
@@ -121,7 +149,7 @@ const NavBar = {
 									value.chat.name === ""
 										? generateChatName(
 												value.recipients,
-												thisUserId
+												authRecord.id
 										  )
 										: value.chat.name;
 								let avatarUrl: string = getChatOrUserAvatar(
@@ -179,13 +207,15 @@ const NavBar = {
 									alt: "Your profile picture",
 									width: "32px",
 							  }),
-						m("strong", authRecord.name),
-						m(
-							"div.secondary#accountId",
-							profileButtonHover
-								? "Click to copy ID"
-								: authRecord.id
-						),
+						m("div", [
+							m("strong", authRecord.name),
+							m(
+								"div.secondary#accountId",
+								profileButtonHover
+									? "Click to copy ID"
+									: authRecord.id
+							),
+						]),
 					]
 				),
 			]),

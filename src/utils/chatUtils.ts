@@ -19,6 +19,10 @@ export function generateChatName(
 		members = members.filter((v) => v.id !== thisUserId);
 	}
 
+	if (members.length === 0) {
+		return "Unknown Chat";
+	}
+
 	return members.map((v) => v.name).join(", ");
 }
 

@@ -4,7 +4,7 @@ import NavBar from "../components/navbar";
 import { ChatModel, chats } from "../collections/chats";
 import { pbMithrilFetch } from "../utils/pbMithril";
 import type { UserModel } from "../collections/users";
-import pb from "../pocketbase";
+import pb, { thisUserId } from "../pocketbase";
 import { base64ToArrayBuffer } from "../utils/base64";
 import { SYMMETRIC_KEY_ALG } from "../crypto";
 import { MessageModel, messages } from "../collections/messages";
@@ -28,7 +28,6 @@ const notificationSound = new Audio("/notification.flac");
 
 let chatId: string = "";
 let thisUser: UserModel | null = pb.authStore.record as UserModel | null;
-let thisUserId: string = "";
 let chatInfo: ChatModel;
 let recipients: { [key: string]: UserModel } = {};
 let symmetricKey: CryptoKey | undefined = undefined;
@@ -68,14 +67,6 @@ async function initChatInfo() {
 	const members = chatInfo.expand?.members as UserModel[];
 	recipients = Object.fromEntries(members.map((value) => [value.id, value]));
 
-	const otherMembers = members.filter((value) => {
-		return value.id != thisUserId;
-	});
-
-	if (otherMembers.length == 0) {
-		window.location.href = "#!/chat";
-	}
-
 	const keyFetchResult = await getSymmetricKey(thisUserId, chatId);
 
 	if (keyFetchResult === null) {
@@ -104,7 +95,7 @@ async function initChatInfo() {
 			return {
 				id: msg.id,
 				senderId: msg.sender,
-				sender: recipients[msg.sender].name,
+				sender: recipients[msg.sender]?.name ?? "Unknown Account",
 				rawContent,
 				content: processedMessage,
 				attachments: msg.attachments,
@@ -142,6 +133,7 @@ async function sendMessage() {
 		iv: JSON.stringify(encrypted.iv),
 	} as MessageModel);
 
+	message = "";
 	(document.getElementById("messageEntry") as HTMLElement).innerText = "";
 }
 
@@ -159,12 +151,6 @@ async function updateMessage(id: string, newContent: string) {
 const Chat = {
 	oninit: async () => {
 		chatId = m.route.param("id");
-
-		const authRecord = pb.authStore.record;
-
-		if (authRecord === null) return;
-
-		thisUserId = authRecord.id;
 
 		initChatInfo();
 
@@ -302,7 +288,6 @@ const Chat = {
 				),
 				m(".flex.gap-2#messageForm", [
 					m("#messageEntry[contenteditable=true]", {
-						placeholder: "Enter your message...",
 						oninput: (event: Event) => {
 							const target = event.target as HTMLElement;
 							message = target.innerText;

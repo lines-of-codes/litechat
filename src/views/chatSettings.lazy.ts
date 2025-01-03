@@ -2,15 +2,20 @@ import type { Component } from "mithril";
 import m from "mithril";
 import { ChatModel, chats } from "../collections/chats";
 import { pbMithrilFetch } from "../utils/pbMithril";
-import pb from "../pocketbase";
-import { generateChatName } from "../utils/chatUtils";
+import pb, { thisUserId } from "../pocketbase";
+import { generateChatName, getSymmetricKey } from "../utils/chatUtils";
 import { UserModel } from "../collections/users";
 import { fetchAndApplyTheme } from "../themes/colorTheme";
+import SingleUserSelector, {
+	SingleUserComponentAttributes,
+} from "../components/singleUserSelect";
+import { KeyExchangeModel, keyExchanges } from "../collections/keyexchanges";
+import { arrayBufferToBase64 } from "../utils/base64";
+import { ASYMMETRIC_KEY_ALG, ASYMMETRIC_KEY_HASH_ALG } from "../crypto";
 
 let chatId: string = "";
 let chat: ChatModel;
-let thisUserId: string;
-let recipients: UserModel[];
+let recipients: UserModel[] = [];
 let chatPhoto: string;
 let chatName: string;
 let newChatName: string = "";
@@ -20,12 +25,6 @@ let formData = new FormData();
 const ChatSettings = {
 	oninit() {
 		chatId = m.route.param("id");
-
-		const authRecord = pb.authStore.record;
-
-		if (authRecord === null) return;
-
-		thisUserId = authRecord.id;
 
 		chats
 			.getOne(chatId, {
@@ -62,21 +61,20 @@ const ChatSettings = {
 					m("span", "Chat Settings"),
 				]),
 			]),
-			m("div.flex.flex-col.gap-4", [
-				m("div", [
+			m("div.flex.flex-wrap.gap-4", [
+				m(".flex.flex-col.items-start.gap-2#photo", [
 					m("h2", "Chat photo"),
 					chatPhoto === ""
-						? m(
-								"p",
-								"This group doesn't have a picture yet. It'll use one of the members' picture."
-						  )
+						? m("p", [
+								"This group doesn't have a picture yet.",
+								m("br"),
+								"It'll use one of the members' picture.",
+						  ])
 						: m("img.rounded", {
 								src: chatPhoto,
 								alt: `${chatName}'s chat photo`,
 								height: 100,
 						  }),
-				]),
-				m("div.flex#photo", [
 					m(
 						"label.button",
 						{
@@ -116,7 +114,7 @@ const ChatSettings = {
 						}),
 					]),
 				]),
-				m("div.flex.flex-col.gap-2#theme", [
+				m(".flex.flex-col.gap-2#theme", [
 					m("h2", "Theme"),
 					m("div", [
 						m(
@@ -144,6 +142,145 @@ const ChatSettings = {
 							]
 						),
 					]),
+				]),
+				m(".flex.flex-col.gap-2#members", [
+					m("h2", "Members"),
+					recipients.map((user) => {
+						return m(
+							"button.button.list-tile.flex.items-center.gap-2",
+							[
+								user.avatar === ""
+									? null
+									: m("img.rounded", {
+											src: pb.files.getURL(
+												user,
+												user.avatar
+											),
+											alt: `${user.name}'s profile picture`,
+											width: 30,
+									  }),
+								user.name,
+							]
+						);
+					}),
+					m(
+						"button.button",
+						{
+							onclick() {
+								const dialog = document.getElementById(
+									"addMemberDialog"
+								) as HTMLDialogElement;
+								dialog.showModal();
+							},
+						},
+						"Add another member"
+					),
+					m("dialog.rounded#addMemberDialog", [
+						m<SingleUserComponentAttributes, any>(
+							SingleUserSelector,
+							{
+								async onUserSelected(user) {
+									const symKey = await getSymmetricKey(
+										thisUserId,
+										chatId
+									);
+
+									if (symKey === null) {
+										alert(
+											"Failed to get the symmetric key for this chat."
+										);
+										return;
+									}
+
+									const jwkKey = JSON.stringify(
+										await crypto.subtle.exportKey(
+											"jwk",
+											symKey
+										)
+									);
+
+									const receiverKey =
+										await crypto.subtle.importKey(
+											"jwk",
+											JSON.parse(user.publicKey),
+											{
+												name: ASYMMETRIC_KEY_ALG,
+												hash: ASYMMETRIC_KEY_HASH_ALG,
+											} as RsaHashedImportParams,
+											true,
+											["encrypt"]
+										);
+
+									const encryptedKey =
+										await crypto.subtle.encrypt(
+											{
+												name: ASYMMETRIC_KEY_ALG,
+											} as RsaOaepParams,
+											receiverKey,
+											new TextEncoder().encode(jwkKey)
+										);
+
+									await keyExchanges.create({
+										chat: chatId,
+										sender: thisUserId,
+										receiver: user.id,
+										key: arrayBufferToBase64(encryptedKey),
+									} as KeyExchangeModel);
+
+									await chats.update(chatId, {
+										"members+": user.id,
+									});
+
+									const dialog = document.getElementById(
+										"addMemberDialog"
+									) as HTMLDialogElement;
+									dialog.close();
+
+									recipients.push(user);
+									m.redraw();
+								},
+							}
+						),
+					]),
+				]),
+				m(".flex.flex-col.gap-2.items-start#actions", [
+					m("h2", "Actions"),
+					m(
+						"button.button.danger",
+						{
+							async onclick() {
+								const answer = confirm(
+									"Are you sure? You won't be able to access this chat again unless someone invited you back."
+								);
+
+								if (!answer) return;
+
+								await chats.update(chatId, {
+									"members-": thisUserId,
+								});
+								window.location.href = "#!/chat";
+							},
+						},
+						"Leave Chat"
+					),
+					m(
+						"button.button.danger",
+						{
+							disabled: recipients.length > 1,
+							title: "You cannot delete the chat before the other member(s) leave.",
+							async onclick() {
+								const answer = confirm(
+									"This action is irreversible. Are you really sure you want to delete the chat?"
+								);
+
+								if (!answer) return;
+
+								await chats.delete(chatId);
+								window.location.href = "#!/chat";
+							},
+						},
+						"Delete chat"
+					),
 				]),
 			]),
 			m("div.flex", [

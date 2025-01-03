@@ -6,9 +6,9 @@ export interface ColorShades {
 	500?: string;
 	/// A darker variant of the color. Used for the border of some elements.
 	600?: string;
-	/// A more darker variant of the color.
+	/// A more darker variant of the color. Used for backgrounds and gradients.
 	700?: string;
-	/// An even darker variant of the color. Used for the border of some elements, backgrounds, and gradients.
+	/// An even darker variant of the color. Used for the border of some elements.
 	800?: string;
 	/// The almost darkest variant of the color. Used for gradients.
 	900?: string;

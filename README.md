@@ -2,7 +2,12 @@
 
 A chat app designed to be lightweight, fast, and secure.
 
-Though, this might not be as secure as something like [Signal](https://signal.org/).
+This app is partially inspired by [Signal](https://signal.org/), a chat app focused on
+privacy and security. But this might not be as secure as Signal.
+
+However, you might see some similarity between Signal and litechat's terms of service.
+
+_(litechat is not endorsed or affiliated by Signal!)_
 
 ## Security
 
