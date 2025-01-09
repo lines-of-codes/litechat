@@ -11,14 +11,14 @@
     "devDependencies": {
         "@types/mithril": "^2.2.7",
         "less": "^4.2.1",
-        "typescript": "~5.7.2",
-        "vite": "^6.0.6"
+        "typescript": "~5.7.3",
+        "vite": "^6.0.7"
     },
-    "packageManager": "pnpm@10.0.0-rc.0+sha256.57703626082eb6cde4a0eddd7a406172265c8509b6442396dbcc513eef3d0841",
+    "packageManager": "pnpm@10.0.0+sha256.43abf6e720fb7bc53c591b0862605c7d323d0a9d2dd33bcac07b062e13cf4948",
     "dependencies": {
         "bootstrap-icons": "^1.11.3",
         "dompurify": "^3.2.3",
-        "marked": "^15.0.4",
+        "marked": "^15.0.6",
         "mithril": "^2.2.12",
         "pocketbase": "^0.23.0"
     }
