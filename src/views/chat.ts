@@ -15,7 +15,7 @@ import {
 	getChatOrUserAvatar,
 	getSymmetricKey,
 } from "../utils/chatUtils";
-import { marked } from "marked";
+import { marked, Token } from "marked";
 import Message, {
 	MessageComponentAttrs,
 	MessageComponentState,
@@ -35,6 +35,7 @@ let messageList: ChatMessage[] = [];
 let message: string = "";
 let chatPhoto: string = "";
 let chatName: string = "";
+let processedTypingMessage: string = "";
 
 async function decryptMessage(str: string, iv: Uint8Array, key: CryptoKey) {
 	const decoder = new TextDecoder();
@@ -56,6 +57,10 @@ function ivFromJson(str: string) {
 /// Parse Markdown and sanitize output
 async function processMessage(input: string) {
 	return DOMPurify.sanitize(await marked.parse(input));
+}
+
+function processMessageSync(input: string) {
+	return DOMPurify.sanitize(marked.parse(input, { async: false }));
 }
 
 async function initChatInfo() {
@@ -89,8 +94,11 @@ async function initChatInfo() {
 			);
 			const processedMessage = await processMessage(rawContent);
 
-			// Needs to be done because Mithril.js and contentEditable is weird
-			rawContent = rawContent.replaceAll("\n", "<br>");
+			rawContent = rawContent
+				.replaceAll("<", "&lt;")
+				.replaceAll(">", "&gt;")
+				// Needs to be done because Mithril.js is weird with contentEditable
+				.replaceAll("\n", "<br>");
 
 			return {
 				id: msg.id,
@@ -148,15 +156,34 @@ async function updateMessage(id: string, newContent: string) {
 	});
 }
 
+function processToken(token: Token): Token {
+	if (token.type !== "code" && "text" in token) {
+		token.raw = token.raw.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+		token.text = token.text.replaceAll("<", "&lt;").replaceAll(">", "&gt;");
+
+		if ("tokens" in token) {
+			token.tokens = processAllTokens(token.tokens!);
+		}
+	}
+	return token;
+}
+
+function processAllTokens(tokens: Token[]): Token[] {
+	return tokens.map((token) => processToken(token));
+}
+
 const Chat = {
 	oninit: async () => {
 		chatId = m.route.param("id");
 
-		initChatInfo();
-
 		marked.use({
 			breaks: true,
+			hooks: {
+				processAllTokens,
+			},
 		});
+
+		initChatInfo();
 	},
 	oncreate: async () => {
 		messages.subscribe(
@@ -177,8 +204,11 @@ const Chat = {
 								rawContent
 							);
 
-							// Needs to be done because Mithril.js and contentEditable is weird
-							rawContent = rawContent.replaceAll("\n", "<br>");
+							rawContent = rawContent
+								.replaceAll("<", "&lt;")
+								.replaceAll(">", "&gt;")
+								// Needs to be done because Mithril.js is weird with contentEditable
+								.replaceAll("\n", "<br>");
 
 							messageList.push({
 								id: data.record.id,
@@ -268,6 +298,7 @@ const Chat = {
 						"a.cleanlink.iconbutton.md#chatSettings",
 						{
 							href: `#!/chat/${chatId}/settings`,
+							ariaLabel: "Chat Settings",
 						},
 						m.trust(`<i class="bi bi-info-circle-fill"></i>`)
 					),
@@ -291,11 +322,12 @@ const Chat = {
 						oninput: (event: Event) => {
 							const target = event.target as HTMLElement;
 							message = target.innerText;
+							processedTypingMessage =
+								processMessageSync(message).trim();
 						},
 						onkeydown(event: KeyboardEvent) {
 							if (event.code === "Enter" && !event.shiftKey) {
-								if (DOMPurify.sanitize(message.trim()) === "")
-									return;
+								if (processedTypingMessage === "") return;
 								sendMessage();
 							}
 						},
@@ -303,8 +335,9 @@ const Chat = {
 					m(
 						"button.button#sendButton",
 						{
-							disabled: DOMPurify.sanitize(message.trim()) === "",
+							disabled: processedTypingMessage === "",
 							onclick: sendMessage,
+							ariaLabel: "Send Message",
 						},
 						[m.trust(`<i class="bi bi-send-fill"></i>`)]
 					),

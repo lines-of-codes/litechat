@@ -92,7 +92,7 @@ const NavBar = {
 				m("#navheader", [
 					m("h1", "litechat"),
 					m(
-						"button.iconbutton[popovertarget='headerMenuPopover']",
+						"button.iconbutton[popovertarget='headerMenuPopover'][aria-label='Menu Toggle']",
 						m.trust(`<i class="bi bi-three-dots"></i>`)
 					),
 				]),
