@@ -9,6 +9,11 @@ However, you might see some similarity between Signal and litechat's terms of se
 
 _(litechat is not endorsed or affiliated by Signal!)_
 
+> [!IMPORTANT]
+> For users: litechat depends on some new & recent browser features.
+> Please keep your browsers updated to make sure litechat will function
+> properly and securely.
+
 ## Security
 
 litechat makes use of the Web Crypto API and has the following process.
@@ -30,13 +35,17 @@ The symmetric key can be rotated when requested, but older chat messages will al
 
 ## Dependencies
 
--   PocketBase: A lightweight database software
--   Mithril.js: A lightweight JavaScript framework for Single Page Applications.
+-   [PocketBase](https://pocketbase.io/): A lightweight database software
+-   [Mithril.js](https://mithril.js.org/): A lightweight JavaScript framework for Single Page Applications.
+-   [DOMPurify](https://github.com/cure53/DOMPurify): Sanitize messages.
+-   [Marked](https://github.com/markedjs/marked): A markdown parser and compiler.
+-   [Bootstrap Icons](https://icons.getbootstrap.com/)
 
 ## DevDependencies
 
--   vite: bundling
--   typescript: the typescript compiler
+-   [vite](https://vite.dev/): bundling
+-   [less](https://lesscss.org/): A language extension for CSS
+-   [typescript](https://www.typescriptlang.org/): the typescript compiler
 
 ## Building & Hosting
 
@@ -59,6 +68,8 @@ Next, install the project's dependencies using `pnpm install`
 Then, To start a development server, use `pnpm dev`
 To build it, use the `pnpm build` command, and by default, the output should be in the `dist` folder.
 
+**When hosting your own litechat instance, You must adapt litechat's Terms of Service appropriately.**
+
 To host the application, You can seperately host the database and the frontend, or host both with the same tool.
 
 To seperately host, just copy the contents of the `dist` folder to your desired web hosting software.
@@ -70,7 +81,7 @@ Create a folder called `pb_public` and copy the contents of the `dist` folder in
 Finally, to start PocketBase, you could:
 
 -   Start it locally by doing `./pocketbase serve`
--   Allow connections from anywhere by doing `./pocketbase serve -http 0.0.0.0:8090`, replace `8090` with your preferred port.
+-   Allow connections from anywhere by doing `./pocketbase serve --http 0.0.0.0:8090`, replace `8090` with your preferred port.
 -   For deploying in production, please refer to [PocketBase's documentation](https://pocketbase.io/docs/going-to-production/)
 
 ## PocketBase Setup
@@ -95,6 +106,11 @@ the serve command.
 Then, In the dashboard, open up the Setting menu, and "Import collections"
 Pick the `pb_schema.json` file. (In the Git repo, should be located at `/pocketbase/pb_schema.json`)
 and follow the on-screen prompt to import the collections.
+
+> [!NOTE]
+> Especially in development versions, The PocketBase database schema might change often.
+> When updating your litechat instance, check if /pocketbase/pb_schema.json is changed.
+> If it is changed, follow the above instruction again to import the collections.
 
 PocketBase should be ready for use with litechat now.
 

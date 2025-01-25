@@ -4,34 +4,6 @@ import pb from "../pocketbase";
 import { UserModel } from "../collections/users";
 import { users } from "../auth";
 
-/*
-<header id="pageheader">
-    <h1>Manage Account</h1>
-</header>
-<main x-data="profile" class="equal-split" id="pagecontainer">
-    <div id="left" class="flex flex-col gap-4 items-start">
-        <div class="flex flex-col gap-2 items-start" id="displayName">
-            <h2>Name</h2>
-            <input type="text" name="displayName" id="displayName" x-model="name"
-                placeholder="Enter your display name...">
-        </div>
-        <div class="flex flex-col gap-2 items-start" id="email">
-            <h2>Email</h2>
-            <input type="text" name="email" id="email" placeholder="Enter your email..." x-model="email">
-        </div>
-        <button class="button" @click="update">Save changes</button>
-    </div>
-    <div id="right">
-        <div id="avatar" class="flex flex-col gap-2 items-start">
-            <h2>Avatar</h2>
-            <img :src="avatar" alt="Your profile picture" id="avatarDisplay" x-cloak x-show="avatar != ''">
-            <label for="avatarFile" class="button">Pick File</label>
-            <input type="file" name="avatarFile" id="avatarFile">
-        </div>
-    </div>
-</main>
-*/
-
 const authRecord = pb.authStore.record as UserModel;
 let avatar: string = "";
 let formData = new FormData();

@@ -10,9 +10,9 @@
     },
     "devDependencies": {
         "@types/mithril": "^2.2.7",
-        "less": "^4.2.1",
+        "less": "^4.2.2",
         "typescript": "~5.7.3",
-        "vite": "^6.0.7"
+        "vite": "^6.0.11"
     },
     "packageManager": "pnpm@10.0.0+sha256.43abf6e720fb7bc53c591b0862605c7d323d0a9d2dd33bcac07b062e13cf4948",
     "dependencies": {

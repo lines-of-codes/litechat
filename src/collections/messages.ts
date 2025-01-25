@@ -7,7 +7,7 @@ export interface MessageModel extends RecordModel {
 	sender: string;
 	chat: string;
 	content: string;
-	attachments: string[];
+	attachments: string[] | File[];
 	iv: string;
 	created: string;
 }

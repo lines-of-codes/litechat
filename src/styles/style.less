@@ -138,6 +138,10 @@ a.button {
 	cursor: pointer;
 	transition: background-color 0.25s, border-color 0.25s;
 
+	&.square {
+		padding: 10px;
+	}
+
 	&.active {
 		background: linear-gradient(to top, var(--color-900), var(--color-700));
 		border-color: var(--color-800);
@@ -204,6 +208,10 @@ a.button {
 
 .items-center {
 	align-items: center;
+}
+
+.items-end {
+	align-items: end;
 }
 
 .space-between {
