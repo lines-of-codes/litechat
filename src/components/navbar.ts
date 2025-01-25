@@ -99,11 +99,9 @@ const NavBar = {
 				m("nav#headerMenuPopover[popover='']", [
 					m("div", [
 						m(
-							"button.button#manageAccBtn",
+							"a.cleanlink.button#manageAccBtn",
 							{
-								onclick() {
-									window.location.href = "#!/manageAccount";
-								},
+								href: "#!/manageAccount",
 							},
 							"Manage Account"
 						),
@@ -118,11 +116,9 @@ const NavBar = {
 							"Logout"
 						),
 						m(
-							"button.button#manageAccBtn",
+							"a.cleanlink.button#manageAccBtn",
 							{
-								onclick() {
-									window.location.href = "#!/about";
-								},
+								href: "#!/about",
 							},
 							"About"
 						),

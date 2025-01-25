@@ -93,9 +93,39 @@ async function downloadAttachment(msg: ChatMessage, fileName: string) {
 }
 
 /**
- * Decrypt and preview image attachments.
+ * Decrypt attachments for preview.
  */
-// function decryptImageAttachments() {}
+async function decryptAttachment(msg: ChatMessage, fileName: string) {
+	const symKey = await getSymmetricKey(thisUserId, msg.chatId);
+
+	if (symKey === null) {
+		return;
+	}
+
+	const originalFileName = getOriginalFileName(fileName);
+	const fileIv: number[] = JSON.parse(msg.iv)[originalFileName];
+
+	const fileUrl = pb.files.getURL(
+		{
+			id: msg.id,
+			collectionName: "messages",
+		},
+		fileName
+	);
+
+	const res = await fetch(fileUrl);
+
+	const decryptedData = await crypto.subtle.decrypt(
+		{
+			name: SYMMETRIC_KEY_ALG,
+			iv: new Uint8Array(fileIv),
+		},
+		symKey,
+		await res.arrayBuffer()
+	);
+
+	return new Blob([decryptedData]);
+}
 
 export type MessageComponentAttrs = {
 	msg: ChatMessage;
@@ -104,7 +134,8 @@ export type MessageComponentAttrs = {
 
 export type MessageComponentState = {
 	currentlyEditing: boolean;
-	decryptionPromises: Promise<File>;
+	decryptionPromises: { [key: string]: Promise<Blob | undefined> };
+	decryptedData: { [key: string]: Blob };
 };
 
 export type MessageComponentType = Component<
@@ -112,8 +143,12 @@ export type MessageComponentType = Component<
 	MessageComponentState
 >;
 
+const imageFiles = /\.(apng|png|avif|gif|jpg|jpeg|jfif|webp)$/;
+
 const Message = {
 	currentlyEditing: false,
+	decryptionPromises: {},
+	decryptedData: [],
 	view(vnode) {
 		let msg = vnode.attrs.msg;
 		let currentlyEditing = vnode.state.currentlyEditing;
@@ -172,12 +207,60 @@ const Message = {
 						if (typeof v !== "string") return;
 
 						const originalFileName = getOriginalFileName(v);
+						const decryptedFileName = originalFileName.substring(
+							0,
+							originalFileName.length - 4
+						);
+
+						if (imageFiles.exec(decryptedFileName) !== null) {
+							if (
+								vnode.state.decryptionPromises[
+									decryptedFileName
+								] === undefined
+							) {
+								vnode.state.decryptionPromises[
+									decryptedFileName
+								] = decryptAttachment(msg, v).then((blob) => {
+									if (blob !== undefined) {
+										vnode.state.decryptedData[
+											decryptedFileName
+										] = blob;
+									}
+									m.redraw();
+									return blob;
+								});
+							} else if (
+								vnode.state.decryptedData[decryptedFileName] !==
+								undefined
+							) {
+								return m(".attachment.image", [
+									m(".header", [
+										m("span", decryptedFileName),
+										m(
+											"button.download-btn",
+											{
+												onclick() {
+													downloadAttachment(msg, v);
+												},
+											},
+											m.trust(
+												`<i class="bi bi-download"></i>`
+											)
+										),
+									]),
+									m("img.image-preview", {
+										src: URL.createObjectURL(
+											vnode.state.decryptedData[
+												decryptedFileName
+											]
+										),
+									}),
+								]);
+							}
+						}
 
 						return m(".attachment", [
-							originalFileName.substring(
-								0,
-								originalFileName.length - 4
-							),
+							decryptedFileName,
 							m(
 								"button.download-btn",
 								{
