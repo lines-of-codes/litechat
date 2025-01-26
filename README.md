@@ -16,6 +16,8 @@ _(litechat is not endorsed or affiliated by Signal!)_
 
 ## Security
 
+*You are free to perform security audits and report any vulnerabilities through GitHub or through Email.*
+
 litechat makes use of the Web Crypto API and has the following process.
 
 When creating an account: generate a RSA-OAEP key pair and store the private key locally,
@@ -77,6 +79,9 @@ To seperately host, just copy the contents of the `dist` folder to your desired 
 
 To host both the database and the frontend with the same tool, In the `pocketbase` folder,
 Create a folder called `pb_public` and copy the contents of the `dist` folder into the new `pb_public` folder.
+
+Please do note that the PocketBase binary provided within the `pocketbase` folder of this repository 
+is for x64 Linux.
 
 Finally, to start PocketBase, you could:
 

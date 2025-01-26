@@ -11,17 +11,19 @@ const Terms = {
 	},
 	view() {
 		return m("#pagecontainer", [
-			m(
-				"p",
-				`These terms are originally written in Markdown. Below is the rendered HTML version of it.`
-			),
-			m(
-				"a",
-				{
-					href: "/tos.md",
-				},
-				"Raw Markdown version"
-			),
+			m("header", [
+				m(
+					"p",
+					`These terms are originally written in Markdown. Below is the rendered HTML version of it.`
+				),
+				m(
+					"a",
+					{
+						href: "/tos.md",
+					},
+					"Raw Markdown version"
+				),
+			]),
 			m.trust(this.content),
 		]);
 	},
