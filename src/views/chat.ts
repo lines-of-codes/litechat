@@ -31,6 +31,8 @@ import {
 	addNotification,
 	NotificationContainer,
 } from "../components/popupNotification";
+import _ from "lodash";
+import { extractExtension } from "../utils/pbUtils";
 
 const notificationSound = new Audio("/notification.flac");
 
@@ -177,12 +179,21 @@ async function initChatInfo() {
 
 type FileEncryptionResult = { file: File; iv: Uint8Array };
 
+function processFileName(fileName: string) {
+	const fileExt = extractExtension(fileName);
+	const snakeCasedFileName = _.snakeCase(
+		fileName.substring(0, fileName.length - fileExt.length)
+	);
+
+	return snakeCasedFileName.concat(fileExt);
+}
+
 function encryptFile(file: File) {
 	return new Promise<FileEncryptionResult>((resolve, _reject) => {
 		const reader = new FileReader();
 		reader.readAsArrayBuffer(file);
 
-		reader.onload = async (_) => {
+		reader.onload = async (_ev) => {
 			if (symmetricKey === undefined) return;
 
 			const iv = crypto.getRandomValues(new Uint8Array(12));
@@ -194,10 +205,15 @@ function encryptFile(file: File) {
 				symmetricKey,
 				reader.result as ArrayBuffer
 			);
+
 			resolve({
-				file: new File([encryptedContent], file.name.concat(".aes"), {
-					type: "application/octet-stream",
-				}),
+				file: new File(
+					[encryptedContent],
+					processFileName(file.name).concat(".aes"),
+					{
+						type: "application/octet-stream",
+					}
+				),
 				iv: iv,
 			});
 		};
@@ -504,7 +520,9 @@ const Chat = {
 											.getElementById(
 												`attachment-${selectedFiles.findIndex(
 													(f) =>
-														f.name ===
+														processFileName(
+															f.name
+														) ===
 														result.file.name.slice(
 															0,
 															result.file.name
