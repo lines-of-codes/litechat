@@ -16,7 +16,7 @@ _(litechat is not endorsed or affiliated by Signal!)_
 
 ## Security
 
-*You are free to perform security audits and report any vulnerabilities through GitHub or through Email.*
+_You are free to perform security audits and report any vulnerabilities through GitHub or through Email._
 
 litechat makes use of the Web Crypto API and has the following process.
 
@@ -80,7 +80,7 @@ To seperately host, just copy the contents of the `dist` folder to your desired 
 To host both the database and the frontend with the same tool, In the `pocketbase` folder,
 Create a folder called `pb_public` and copy the contents of the `dist` folder into the new `pb_public` folder.
 
-Please do note that the PocketBase binary provided within the `pocketbase` folder of this repository 
+Please do note that the PocketBase binary provided within the `pocketbase` folder of this repository
 is for x64 Linux.
 
 Finally, to start PocketBase, you could:
@@ -122,3 +122,9 @@ PocketBase should be ready for use with litechat now.
 It is recommended that you explore the PocketBase settings and set everything to match with your
 environment and your needs and follow PocketBase's guide on
 [going to production.](https://pocketbase.io/docs/going-to-production/)
+
+_After_ commit `40a6bc0` (Jan 29, 2025), litechat started including custom PocketBase hooks.
+It is recommended that you set up rate limiting for the following path(s) as they're resource
+intensive:
+
+-   `/api/litechat/users/export/` - Exports ALL user data.

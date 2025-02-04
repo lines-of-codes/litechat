@@ -4,8 +4,8 @@ import pb from "./pocketbase";
 import type { UserModel } from "./collections/users";
 import m from "mithril";
 import "bootstrap-icons/font/bootstrap-icons.min.css";
-import "./styles/style.less";
-import "./styles/index.less";
+import "./styles/style.css";
+import "./styles/index.css";
 
 if (!pb.authStore.isValid) {
 	window.location.href = "login.html";
@@ -38,6 +38,7 @@ if (authRecord !== null) {
 		"/about": LazyView("about"),
 		"/importPrivateKey": LazyView("importPrivateKey"),
 		"/exportPrivateKey": LazyView("exportPrivateKey"),
+		"/exportData": LazyView("exportData"),
 	});
 
 	if (authRecord.name === "") {

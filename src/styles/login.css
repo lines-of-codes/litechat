@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+#loginForm {
+	display: flex;
+	flex-direction: column;
+	max-width: 500px;
+	gap: 0.75em;
+	input,
+	button {
+		background-color: var(--color-slate-600);
+		color: inherit;
+		border: none;
+		outline: none;
+		padding: 10px 15px;
+		border-radius: 5px;
+		font-family: inherit;
+
+		&:focus {
+			outline: 2px var(--color-slate-100) solid;
+		}
+	}
+
+	#actions {
+		display: grid;
+		gap: 0.75em;
+		grid-template-columns: 1fr 1fr;
+	}
+}
+
+button {
+	cursor: pointer;
+}
+
+body {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-image: linear-gradient(
+		45deg,
+		var(--color-slate-900),
+		var(--color-slate-700)
+	);
+	background-repeat: no-repeat;
+	margin: 0;
+	height: 100vh;
+	font-family: Inter, sans-serif;
+	color: var(--color-slate-100);
+	text-align: center;
+}
+
+a {
+	color: inherit;
+}
+
+p {
+	margin: 0.25em 0;
+}

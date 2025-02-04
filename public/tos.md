@@ -1,13 +1,14 @@
 # litechat Terms & Privacy Policy
 
-Written on January 3rd, 2025.
-These terms will be in effect on January 4th, 2025.
+Originally written on January 3rd, 2025.
+Updated on February 4th, 2025.
+These terms will be in effect on February 5th, 2025.
 
 # Terms of Service
 
 litechat is an open-source service that provides private messaging with end-to-end encryption. By using the service, you agree to these terms.
 
-Because of litechat's open-source nature, any entity can host their instance of litechat. **These terms of service only covers the main litechat instance**, temporarily available at the domain https://litechat.taeyai.com. We are **NOT** responsible for any actions happening on other self-hosted instances of litechat.
+Because of litechat's open-source nature, any entity can host their instance of litechat. **These terms of service only covers the main litechat instance**, currently available at the domain https://litechat.dailitation.xyz. We are **NOT** responsible for any actions happening on other self-hosted instances of litechat.
 
 litechat's code (and only litechat's code, not its dependencies) is licensed under the GNU General Public License version 3, and the license may be referenced throughout the terms. The license is available online for viewing at https://github.com/lines-of-codes/litechat/blob/main/LICENSE.
 

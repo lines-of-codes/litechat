@@ -64,6 +64,17 @@ const ManageAccount = {
 							},
 						}),
 					]),
+					m(".flex.flex-col.gap-2.items-start#export", [
+						m("h2", "Export Data"),
+						m("p", "Save all your data into a file."),
+						m(
+							"a.cleanlink.button#exportAllData",
+							{
+								href: "#!/exportData",
+							},
+							"Export all data"
+						),
+					]),
 					m(".flex.flex-col.gap-2.items-start#dangerous", [
 						m("h2", "Dangerous Actions"),
 						m(
@@ -86,7 +97,7 @@ If you haven't done it already, you might want to backup your data first.`
 					]),
 				]),
 				m("#right.flex.flex-col.gap-4.items-start", [
-					m("#avatar.flex.flex-col.gap-2.items-start#avatar", [
+					m(".flex.flex-col.gap-2.items-start#avatar", [
 						m("h2", "Avatar"),
 						avatar === ""
 							? null

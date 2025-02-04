@@ -402,10 +402,9 @@ const Chat = {
 					m("header.flex.gap-2.items-center#chatHeader", [
 						chatPhoto === ""
 							? null
-							: m("img.rounded", {
+							: m("img.rounded.h-7", {
 									src: chatPhoto,
 									alt: `${chatName}'s chat photo`,
-									height: 29.5,
 							  }),
 						m("span", chatName),
 					]),

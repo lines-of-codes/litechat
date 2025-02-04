@@ -1,0 +1,45 @@
+html,
+body {
+	height: unset;
+}
+
+h1,
+h2,
+h3 {
+	margin: 0.75em 0 0.5em 0;
+}
+
+p {
+	margin: 16px 0;
+}
+
+@media print {
+	body,
+	a {
+		color: black;
+	}
+
+	header {
+		display: none;
+	}
+
+	h1 {
+		margin-top: 0;
+	}
+}
+
+ul {
+	@apply list-disc list-inside;
+}
+
+h1 {
+	@apply text-4xl font-bold tracking-tight;
+}
+
+h2 {
+	@apply text-3xl font-bold tracking-tight;
+}
+
+h3 {
+	@apply text-2xl font-bold;
+}

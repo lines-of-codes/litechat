@@ -29,21 +29,18 @@ const AboutPage = {
 						),
 					]
 				),
-				m(
-					"p",
-          [
-					  "litechat is a chat application designed to be lightweight, fast, and secure.",
-            "Open-source under the GPLv3 license.",
-            m("br"),
-            m(
-              "a", 
-              {
-                href: "/terms.html"
-              }, 
-              "Terms and Conditions"
-            ),
-          ]
-				),
+				m("p", [
+					"litechat is a chat application designed to be lightweight, fast, and secure.",
+					"Open-source under the GPLv3 license.",
+					m("br"),
+					m(
+						"a",
+						{
+							href: "/terms.html",
+						},
+						"Terms and Conditions"
+					),
+				]),
 				m("div", [
 					m("strong", "Notification sound"),
 					m("div", [
@@ -80,7 +77,7 @@ const AboutPage = {
 				]),
 				m("div", [
 					m("strong", "Tools & Libraries"),
-					m("ul", [
+					m("ul.list-disc.list-inside", [
 						m("li", [
 							m(
 								"a",
@@ -123,6 +120,17 @@ const AboutPage = {
 									rel: "noopener noreferrer",
 								},
 								"TypeScript (Apache-2.0 license)"
+							),
+						]),
+						m("li", [
+							m(
+								"a",
+								{
+									href: "https://tailwindcss.com/",
+									target: "_blank",
+									rel: "noopener noreferrer",
+								},
+								"TailwindCSS (MIT license)"
 							),
 						]),
 					]),

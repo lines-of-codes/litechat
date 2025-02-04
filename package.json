@@ -9,19 +9,21 @@
         "preview": "vite preview"
     },
     "devDependencies": {
+        "@tailwindcss/vite": "^4.0.3",
         "@types/lodash": "^4.17.15",
         "@types/mithril": "^2.2.7",
-        "less": "^4.2.2",
+        "@types/node": "^22.13.1",
         "typescript": "~5.7.3",
         "vite": "^6.0.11"
     },
     "packageManager": "pnpm@10.0.0+sha256.43abf6e720fb7bc53c591b0862605c7d323d0a9d2dd33bcac07b062e13cf4948",
     "dependencies": {
         "bootstrap-icons": "^1.11.3",
-        "dompurify": "^3.2.3",
+        "dompurify": "^3.2.4",
         "lodash": "^4.17.21",
         "marked": "^15.0.6",
-        "mithril": "^2.2.12",
-        "pocketbase": "^0.23.0"
+        "mithril": "^2.2.13",
+        "pocketbase": "^0.23.0",
+        "tailwindcss": "^4.0.3"
     }
 }

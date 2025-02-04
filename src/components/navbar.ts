@@ -87,10 +87,10 @@ const NavBar = {
 	view: () => {
 		const authRecord = pb.authStore.record as UserModel;
 
-		return m("nav.flex.flex-col.space-between", [
+		return m("nav.flex.flex-col.justify-between", [
 			m("#sidebarStart.flex.flex-col.gap-2", [
 				m("#navheader", [
-					m("h1", "litechat"),
+					m("h1.text-2xl.font-bold", "litechat"),
 					m(
 						"button.iconbutton[popovertarget='headerMenuPopover'][aria-label='Menu Toggle']",
 						m.trust(`<i class="bi bi-three-dots"></i>`)
@@ -166,7 +166,7 @@ const NavBar = {
 									[
 										avatarUrl === ""
 											? null
-											: m("img.rounded", {
+											: m("img.rounded.h-6", {
 													src: avatarUrl,
 													alt: `${chatName}'s chat picture`,
 													height: "24",

@@ -1,0 +1,319 @@
+@reference "./style.css";
+
+#noChat {
+	margin: 5vh 5vw;
+}
+
+#chats {
+	padding-inline: 0;
+	margin: 0;
+
+	a {
+		width: initial !important;
+		padding: 10px 15px;
+	}
+}
+
+#chatHeader {
+	background-color: var(--color-700);
+	padding: 8px 10px;
+	border-radius: 5px;
+	width: 100%;
+}
+
+#headerMenuPopover {
+	inset: unset;
+	width: calc(90vw / 4);
+	border: 1px solid var(--color-600);
+	border-radius: 10px;
+	padding: 0;
+	margin-top: 36px;
+
+	& > div {
+		display: flex;
+		flex-direction: column;
+	}
+
+	a:first-child {
+		border-radius: 8px 8px 0 0;
+	}
+
+	button:not(:first-child):not(:last-child) {
+		border-radius: 0;
+	}
+
+	a:last-child {
+		border-radius: 0 0 8px 8px;
+	}
+}
+
+.secondary {
+	color: #909090;
+	font-size: 0.7em;
+}
+
+#messageList {
+	overflow: auto;
+	max-height: 75vh;
+}
+
+#messageEntry {
+	width: 100%;
+	max-height: 3em;
+	overflow: auto;
+}
+
+#chatarea {
+	display: grid;
+	grid-template-rows: auto 1fr auto;
+	height: 90vh;
+	gap: 0.5em;
+}
+
+.message {
+	padding: 10px 15px;
+	border-radius: 5px;
+	transition: background-color 75ms;
+	display: flex;
+	justify-content: space-between;
+
+	&:hover {
+		background-color: rgba(0, 0, 0, 0.25);
+	}
+
+	.actions {
+		display: none;
+
+		* {
+			border-radius: 0;
+		}
+
+		:first-child {
+			border-radius: 5px 0 0 5px;
+		}
+
+		:last-child {
+			border-radius: 0 5px 5px 0;
+		}
+	}
+
+	&:hover .actions {
+		display: flex;
+		align-items: center;
+	}
+
+	.senderName {
+		font-weight: 500;
+		display: flex;
+		align-items: flex-end;
+	}
+
+	.attachmentList {
+		margin-top: 0.3em;
+	}
+}
+
+.resultList {
+	overflow: scroll;
+	max-height: 50vh;
+}
+
+.chatName {
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+	max-width: 30vw;
+}
+
+pre {
+	background-color: var(--color-700);
+	padding: 5px 10px;
+	border-radius: 5px;
+}
+
+@utility grid-chat-split {
+	grid-template-columns: 1fr 3fr;
+}
+
+#pagecontainer {
+	&.nochat,
+	&.chat {
+		display: grid;
+		@apply grid grid-chat-split;
+		gap: 0.5em;
+		height: 90vh;
+	}
+
+	#chatBackBtn {
+		display: none;
+	}
+
+	@media (max-width: 640px) {
+		&.nochat,
+		&.chat {
+			display: flex !important;
+			grid-template-columns: unset !important;
+			padding: 3vh 5vw;
+			height: 87vh !important;
+		}
+
+		&.nochat {
+			#chatarea {
+				display: none;
+			}
+
+			nav {
+				width: 100%;
+			}
+		}
+
+		.chatName {
+			max-width: 90vw;
+		}
+
+		&.chat {
+			nav {
+				display: none;
+			}
+
+			#chatarea {
+				width: 100%;
+			}
+
+			#chatBackBtn {
+				display: flex;
+			}
+		}
+	}
+}
+
+#attachmentBox {
+	background-color: var(--color-700);
+	border-radius: 5px;
+	padding: 5px 10px;
+}
+
+.attachmentList {
+	display: flex;
+	gap: 0.5em;
+	flex-wrap: wrap;
+	max-width: 50vw;
+}
+
+.attachment {
+	display: flex;
+	gap: 0.5em;
+	background-color: var(--color-600);
+	border-radius: 5px;
+	padding: 3px 6px;
+	position: relative;
+
+	&.image {
+		display: flex;
+		flex-direction: column;
+		gap: 0em;
+		flex: 1 1 auto;
+		padding: 0;
+
+		.header {
+			span {
+				display: none;
+			}
+		}
+
+		.image-preview {
+			border-radius: 5px;
+			max-width: 50vw;
+			max-height: 30vh;
+		}
+
+		&:hover .download-btn {
+			opacity: 1;
+		}
+
+		.download-btn {
+			opacity: 0;
+			position: absolute;
+			right: 5px;
+			top: 5px;
+		}
+	}
+
+	&.ready {
+		border: 1px solid #30f050;
+	}
+
+	.close-btn,
+	.download-btn {
+		cursor: pointer;
+		background: var(--color-700);
+		border: 2px solid transparent;
+		transition: 150ms;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		padding: 0 3px;
+		border-radius: 3px;
+
+		&:hover {
+			border-color: var(--color-600);
+		}
+	}
+}
+
+.notification-container {
+	position: fixed;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5em;
+	top: 1em;
+	left: 50vw;
+	transform: translateX(50%);
+}
+
+.notification {
+	width: fit-content;
+	max-width: 40vw;
+	background-color: var(--color-600);
+	padding: 5px 10px;
+	border-radius: 5px;
+	animation: 5.1s ease-in-out fade;
+
+	@media screen and (max-width: 640px) {
+		max-width: 95vw;
+	}
+}
+
+@keyframes fade {
+	0% {
+		opacity: 0;
+	}
+
+	5% {
+		opacity: 1;
+	}
+
+	95% {
+		opacity: 1;
+	}
+
+	100% {
+		opacity: 0;
+	}
+}
+
+fieldset {
+	margin: revert;
+	padding: revert;
+	border: 2px solid var(--color-slate-400);
+	height: fit-content;
+	border-radius: 5px;
+}
+
+legend {
+	padding: revert;
+}
+
+dialog {
+	@apply m-auto p-6;
+}

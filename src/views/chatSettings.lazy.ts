@@ -70,10 +70,9 @@ const ChatSettings = {
 								m("br"),
 								"It'll use one of the members' picture.",
 						  ])
-						: m("img.rounded", {
+						: m("img.rounded.w-45", {
 								src: chatPhoto,
 								alt: `${chatName}'s chat photo`,
-								height: 100,
 						  }),
 					m(
 						"label.button",
