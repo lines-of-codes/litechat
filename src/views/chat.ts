@@ -404,7 +404,7 @@ const Chat = {
 					selectedFiles.length > 0
 						? m("#attachmentBox", [
 								m("span.flex.gap-1.items-end", [
-									m("strong", "Attachments (Beta)"),
+									m("strong", "Attachments"),
 									m(
 										"span.secondary",
 										"Max 15MB per file. Encrypted files ready to sent will be highlighted in green."

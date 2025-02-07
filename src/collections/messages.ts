@@ -10,4 +10,5 @@ export interface MessageModel extends RecordModel {
 	attachments: string[] | File[];
 	iv: string;
 	created: string;
+	updated: string;
 }

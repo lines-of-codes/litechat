@@ -24,6 +24,16 @@ interface UserData {
 	messages: MessageModel[];
 }
 
+interface ExportOptions {
+	simplified: boolean;
+	decrypted: boolean;
+	hasMessages: FormDataEntryValue | null;
+	hasChatList: FormDataEntryValue | null;
+	hasRelatedPeople: FormDataEntryValue | null;
+	hasEncryptionKeys: FormDataEntryValue | null;
+	keyFormat: FormDataEntryValue | null;
+}
+
 interface ExportResult {
 	blob?: Blob;
 	fileExt: string;
@@ -32,6 +42,25 @@ interface ExportResult {
 type StringMap = { [key: string]: string };
 
 let hasEncryptionKeys = false;
+let exportFormat = "json";
+
+function processUsers(userData: UserData): {
+	users: { [id: string]: UserModel };
+	userNames: StringMap;
+} {
+	let users: { [id: string]: UserModel } = {};
+	let userNames: StringMap = {};
+
+	for (const person of userData.relatedPeople) {
+		users[person.id] = person;
+		userNames[person.id] = `${person.name} (${person.id})`;
+	}
+
+	return {
+		users,
+		userNames,
+	};
+}
 
 async function processChatData(
 	userData: UserData,
@@ -60,7 +89,7 @@ async function processChatData(
 		const symKey = await getSymmetricKey(thisUserId, chat.id);
 
 		if (symKey === null) {
-			undecryptableChat.push(`${chatNames[chat.id]} (ID: ${chat.id})`);
+			undecryptableChat.push(`${chatNames[chat.id]} (${chat.id})`);
 			continue;
 		}
 
@@ -75,13 +104,9 @@ async function processChatData(
 }
 
 async function exportJson(
-	formData: FormData,
+	options: ExportOptions,
 	userData: UserData
 ): Promise<ExportResult> {
-	const simplified = formData.get("simplified") === "yes";
-	const decrypt = formData.get("decrypted") === "yes";
-	const hasRelatedPeople = formData.get("hasRelatedPeople");
-	let keyFormat = formData.get("keyFormat");
 	const progressBar = document.getElementById(
 		"progressBar"
 	) as HTMLProgressElement;
@@ -90,23 +115,16 @@ async function exportJson(
 	) as HTMLDivElement;
 	let output: { [key: string]: any } = {
 		options: {
-			simplified,
-			decrypt,
+			simplified: options.simplified,
+			decrypt: options.decrypted,
 		},
 	};
-	let users: { [id: string]: UserModel } = {};
-	let userNames: StringMap = {};
 
 	currentAction.innerText = "Parsing and extracting data...";
 
-	if (!hasEncryptionKeys) {
-		keyFormat = "jwk";
-	}
-
-	for (const person of userData.relatedPeople) {
-		users[person.id] = person;
-		userNames[person.id] = `${person.name} (${person.id})`;
-	}
+	const userList = processUsers(userData);
+	let users: { [id: string]: UserModel } = userList.users;
+	let userNames: StringMap = userList.userNames;
 
 	const chatData = await processChatData(userData, users);
 
@@ -114,7 +132,7 @@ async function exportJson(
 	let chatNames = chatData.chatNames;
 	let chatKeys = chatData.chatKeys;
 
-	if (formData.get("hasMessages")) {
+	if (options.hasMessages) {
 		currentAction.innerText = "Processing message data...";
 		let messageData = userData.messages;
 		output.messages = [];
@@ -129,10 +147,10 @@ async function exportJson(
 				updated: message.updated,
 			};
 
-			if (simplified) {
-				for (const attachment in message.attachments) {
+			if (options.simplified) {
+				for (const attachment of message.attachments) {
 					processedMessage.attachments.push(
-						pb.files.getURL(message, attachment)
+						pb.files.getURL(message, attachment as string)
 					);
 				}
 				processedMessage.chat = chatNames[message.chat];
@@ -143,7 +161,7 @@ async function exportJson(
 				processedMessage.sender = message.sender;
 			}
 
-			if (decrypt) {
+			if (options.decrypted) {
 				processedMessage.content = await decryptMessage(
 					message.content,
 					ivFromJson(message.iv),
@@ -159,7 +177,7 @@ async function exportJson(
 		progressBar.removeAttribute("value");
 	}
 
-	if (formData.get("hasChatList")) {
+	if (options.hasChatList) {
 		currentAction.innerText = "Processing chat list...";
 		output.chats = [];
 
@@ -177,7 +195,7 @@ async function exportJson(
 				members: chat.members,
 			};
 
-			if (simplified) {
+			if (options.simplified) {
 				processedChat.photo = pb.files.getURL(chat, chat.photo);
 				processedChat.members = [];
 
@@ -185,6 +203,8 @@ async function exportJson(
 					processedChat.members.push(userNames[member]);
 				}
 			}
+
+			output.chats.push(processedChat);
 		}
 		progressBar.removeAttribute("value");
 	}
@@ -207,7 +227,7 @@ async function exportJson(
 				continue;
 
 			if (key === "privateKey") {
-				if (keyFormat === "notJwk") {
+				if (options.keyFormat === "notJwk") {
 					const importedKey = await crypto.subtle.importKey(
 						"jwk",
 						JSON.parse(value),
@@ -236,7 +256,7 @@ async function exportJson(
 				continue;
 			}
 
-			if (keyFormat === "notJwk") {
+			if (options.keyFormat === "notJwk") {
 				const importedKey = await crypto.subtle.importKey(
 					"jwk",
 					JSON.parse(value),
@@ -259,7 +279,7 @@ async function exportJson(
 		progressBar.removeAttribute("value");
 	}
 
-	if (hasRelatedPeople) {
+	if (options.hasRelatedPeople) {
 		currentAction.innerText = "Processing related people information...";
 		output.relatedPeople = await Promise.all(
 			userData.relatedPeople.map(async (user) => {
@@ -271,12 +291,12 @@ async function exportJson(
 					updated: user.updated,
 				};
 
-				if (simplified) {
+				if (options.simplified) {
 					processed.avatar = pb.files.getURL(user, user.avatar);
 				}
 
 				if (hasEncryptionKeys) {
-					switch (keyFormat) {
+					switch (options.keyFormat) {
 						case "jwk":
 							output.encryptionKeys[`user_${user.id}`] =
 								user.publicKey;
@@ -316,7 +336,7 @@ async function exportJson(
 	let blob: Blob | undefined;
 	let fileExt = "json";
 
-	switch (keyFormat) {
+	switch (options.keyFormat) {
 		case "jwk":
 			let stringified = JSON.stringify(output);
 			blob = new Blob([stringified]);
@@ -338,25 +358,289 @@ async function exportJson(
 	};
 }
 
-// TODO: Implement Markdown export
 async function exportMarkdown(
-	formData: FormData,
+	options: ExportOptions,
 	userData: UserData
 ): Promise<ExportResult> {
+	const progressBar = document.getElementById(
+		"progressBar"
+	) as HTMLProgressElement;
+	const currentAction = document.getElementById(
+		"currentAction"
+	) as HTMLDivElement;
+	const currentDate = new Date();
+	let output = `# litechat Data Export ${currentDate.toISOString()}\n\n`;
+	let encryptionKeys: { [id: string]: any } = {};
+
+	const userList = processUsers(userData);
+	const chatData = await processChatData(userData, userList.users);
+
+	if (options.hasChatList) {
+		output += "## Chat List\n\n";
+
+		for (const chat of userData.chats) {
+			output += `- ${chatData.chatNames[chat.id]} (${chat.id})\n`;
+		}
+
+		output += "\n\n";
+	}
+
+	if (options.hasRelatedPeople) {
+		currentAction.innerText = "Processing related people data...";
+		progressBar.max = userData.relatedPeople.length;
+		progressBar.value = 0;
+
+		output += "## Related People\n\n";
+
+		const users = await Promise.all(
+			userData.relatedPeople.map(async (user) => {
+				let processed: { [key: string]: any } = {
+					avatar: user.avatar,
+					id: user.id,
+					name: user.name,
+					created: user.created.replaceAll(":", "\\:"),
+					updated: user.updated.replaceAll(":", "\\:"),
+				};
+
+				if (options.simplified) {
+					processed.avatar = pb.files.getURL(user, user.avatar);
+				}
+
+				if (options.hasEncryptionKeys) {
+					switch (options.keyFormat) {
+						case "jwk":
+							encryptionKeys[`user_${user.id}`] = user.publicKey;
+							break;
+						case "notJwk":
+							const userPubKey = await crypto.subtle.importKey(
+								"jwk",
+								JSON.parse(user.publicKey),
+								{
+									name: ASYMMETRIC_KEY_ALG,
+									hash: ASYMMETRIC_KEY_HASH_ALG,
+								} as RsaHashedImportParams,
+								true,
+								["encrypt"]
+							);
+							encryptionKeys[`user_${user.id}.pem`] =
+								"-----BEGIN PUBLIC KEY-----\n".concat(
+									arrayBufferToBase64(
+										await crypto.subtle.exportKey(
+											"spki",
+											userPubKey
+										)
+									),
+									"\n-----END PUBLIC KEY-----"
+								);
+							break;
+					}
+				}
+
+				progressBar.value++;
+
+				return `- **Avatar:** ${processed.avatar}
+- **ID:** ${processed.id}
+- **Name:** ${processed.name}
+- **Created:** ${processed.created}
+- **Updated:** ${processed.updated}`;
+			})
+		);
+
+		output += users.join("\n\n");
+		output += "\n\n";
+
+		progressBar.removeAttribute("value");
+	}
+
+	if (options.hasEncryptionKeys) {
+		currentAction.innerText = "Processing encryption keys...";
+
+		const storageLength = localStorage.length;
+
+		for (let i = 0; i < storageLength; i++) {
+			const key = localStorage.key(i);
+			const value = localStorage.getItem(key ?? "");
+
+			if (
+				(!key?.startsWith("chat_") && key !== "privateKey") ||
+				value === null
+			)
+				continue;
+
+			if (key === "privateKey") {
+				if (options.keyFormat === "notJwk") {
+					const importedKey = await crypto.subtle.importKey(
+						"jwk",
+						JSON.parse(value),
+						{
+							name: ASYMMETRIC_KEY_ALG,
+							hash: ASYMMETRIC_KEY_HASH_ALG,
+						} as RsaHashedImportParams,
+						true,
+						["decrypt"]
+					);
+					encryptionKeys["privateKey.pem"] =
+						"-----BEGIN PRIVATE KEY-----\n".concat(
+							arrayBufferToBase64(
+								await crypto.subtle.exportKey(
+									"pkcs8",
+									importedKey
+								)
+							),
+							"\n-----END PRIVATE KEY-----"
+						);
+				} else {
+					encryptionKeys["privateKey"] = value;
+				}
+
+				continue;
+			}
+
+			if (options.keyFormat === "notJwk") {
+				const importedKey = await crypto.subtle.importKey(
+					"jwk",
+					JSON.parse(value),
+					{ name: SYMMETRIC_KEY_ALG, length: 256 } as AesKeyAlgorithm,
+					true,
+					["encrypt", "decrypt"]
+				);
+				encryptionKeys[`${key}.pem`] =
+					"-----BEGIN SECRET KEY-----\n".concat(
+						arrayBufferToBase64(
+							await crypto.subtle.exportKey("raw", importedKey)
+						),
+						"\n-----END SECRET KEY-----"
+					);
+			} else {
+				encryptionKeys[key] = value;
+			}
+		}
+
+		output += "## Encryption Keys\n\n";
+
+		for (const key in encryptionKeys) {
+			const value = encryptionKeys[key];
+
+			output += `### ${key}\n\n\`\`\`\n`;
+			output += value;
+			output += "\n```\n\n";
+		}
+	}
+
+	if (options.hasMessages) {
+		currentAction.innerText = "Processing messages...";
+
+		for (const chat of userData.chats) {
+			currentAction.innerText = `Processing chat "${chat.name}"`;
+			output += `## ${chatData.chatNames[chat.id]} (${chat.id})\n\n`;
+
+			const messages = userData.messages
+				.filter((msg) => msg.chat === chat.id)
+				.sort(
+					(a, b) =>
+						new Date(a.created).getTime() -
+						new Date(b.created).getTime()
+				);
+			progressBar.max = messages.length;
+			progressBar.value = 0;
+
+			for (const message of messages) {
+				progressBar.value++;
+				const decryptedMessage = await decryptMessage(
+					message.content,
+					ivFromJson(message.iv),
+					chatData.chatKeys[chat.id]
+				);
+				let sender = message.sender;
+				let editedOn = "";
+
+				if (options.simplified) {
+					sender = userList.userNames[message.sender];
+				}
+
+				if (message.updated != message.created) {
+					editedOn = ` edited on ${message.updated.replaceAll(
+						":",
+						"\\:"
+					)}`;
+				}
+
+				output += `**${sender}** (sent on ${message.created.replaceAll(
+					":",
+					"\\:"
+				)}${editedOn}):\n`;
+				output += decryptedMessage;
+				output += "\n\n";
+			}
+
+			progressBar.removeAttribute("value");
+		}
+	}
+
 	return {
-		blob: new Blob(),
+		blob: new Blob([output]),
 		fileExt: "md",
 	};
 }
 
-// TODO: Implement plain text export
-async function exportPlainText(
-	formData: FormData,
-	userData: UserData
-): Promise<ExportResult> {
+async function exportPlainText(userData: UserData): Promise<ExportResult> {
+	const progressBar = document.getElementById(
+		"progressBar"
+	) as HTMLProgressElement;
+	const currentAction = document.getElementById(
+		"currentAction"
+	) as HTMLDivElement;
+	const currentDate = new Date();
+	let output = `litechat Data Export ${currentDate.toISOString()}\n`;
+
+	const userList = processUsers(userData);
+	const chatData = await processChatData(userData, userList.users);
+
+	currentAction.innerText = "Processing messages...";
+
+	for (const chat of userData.chats) {
+		currentAction.innerText = `Processing chat "${chat.name}"`;
+		output += `[chat] ${chatData.chatNames[chat.id]} (${chat.id})\n\n`;
+
+		const messages = userData.messages
+			.filter((msg) => msg.chat === chat.id)
+			.sort(
+				(a, b) =>
+					new Date(a.created).getTime() -
+					new Date(b.created).getTime()
+			);
+		progressBar.max = messages.length;
+		progressBar.value = 0;
+
+		for (const message of messages) {
+			progressBar.value++;
+			const decryptedMessage = await decryptMessage(
+				message.content,
+				ivFromJson(message.iv),
+				chatData.chatKeys[chat.id]
+			);
+			let sender = userList.userNames[message.sender];
+			let editedOn = "";
+
+			if (message.updated != message.created) {
+				editedOn = ` edited on ${message.updated}`;
+			}
+
+			output += `${sender} (sent on ${message.created}${editedOn}):\n`;
+			output += "Attachments: ";
+			output += message.attachments.map((v) =>
+				pb.files.getURL(message, v as string)
+			);
+			output += decryptedMessage;
+			output += "\n";
+		}
+
+		progressBar.removeAttribute("value");
+	}
+
 	return {
-		blob: new Blob(),
-		fileExt: "md",
+		blob: new Blob([output]),
+		fileExt: "txt",
 	};
 }
 
@@ -379,17 +663,31 @@ async function exportData(formData: FormData) {
 			{}
 		);
 
+		let parsedOptions: ExportOptions = {
+			simplified: formData.get("simplified") === "yes",
+			decrypted: formData.get("decrypted") === "yes",
+			keyFormat: formData.get("keyFormat"),
+			hasMessages: formData.get("hasMessages"),
+			hasChatList: formData.get("hasChatList"),
+			hasRelatedPeople: formData.get("hasRelatedPeople"),
+			hasEncryptionKeys: formData.get("hasEncryptionKeys"),
+		};
+
+		if (!parsedOptions.hasEncryptionKeys) {
+			parsedOptions.keyFormat = "jwk";
+		}
+
 		let result: ExportResult | undefined;
 
 		switch (format) {
 			case "json":
-				result = await exportJson(formData, userData);
+				result = await exportJson(parsedOptions, userData);
 				break;
 			case "markdown":
-				result = await exportMarkdown(formData, userData);
+				result = await exportMarkdown(parsedOptions, userData);
 				break;
 			case "log":
-				result = await exportPlainText(formData, userData);
+				result = await exportPlainText(userData);
 				break;
 		}
 
@@ -452,7 +750,7 @@ const ExportDataPage = {
 					m.trust(`<i class="bi bi-chevron-left"></i>`)
 				),
 				m(".flex.gap-2.items-center#chatHeader", [
-					m("span", "Export Data"),
+					m("span", "Export Data (Beta)"),
 				]),
 			]),
 			m(
@@ -480,62 +778,84 @@ const ExportDataPage = {
 						m("legend", "Export format"),
 						m("div", [
 							m(
-								"input[type=radio][checked][name=format][value=json]#json"
+								"input[type=radio][name=format][value=json]#json",
+								{
+									checked: exportFormat === "json",
+									onchange(e: Event) {
+										const target =
+											e.target as HTMLInputElement;
+										exportFormat = target.value;
+									},
+								}
 							),
 							m("label[for=json]", " JSON"),
 						]),
 						m("div", [
 							m(
-								"input[type=radio][name=format][value=markdown]#markdown"
+								"input[type=radio][name=format][value=markdown]#markdown",
+								{
+									onchange(e: Event) {
+										const target =
+											e.target as HTMLInputElement;
+										exportFormat = target.value;
+									},
+								}
 							),
 							m("label[for=markdown]", " Markdown"),
 						]),
 						m("div", [
-							m("input[type=radio][name=format][value=log]#log"),
+							m("input[type=radio][name=format][value=log]#log", {
+								onchange(e: Event) {
+									const target = e.target as HTMLInputElement;
+									exportFormat = target.value;
+								},
+							}),
 							m("label[for=log]", " Plain Text"),
 						]),
 					]),
-					m("fieldset.flex.flex-col#includes", [
-						m("legend", "Included data"),
-						m("div", [
-							m(
-								"input[type=checkbox][checked][name=hasMessages]#hasMessages"
-							),
-							m("label[for=hasMessages]", " Messages"),
-						]),
-						m("div", [
-							m(
-								"input[type=checkbox][checked][name=hasChatList]#hasChatList"
-							),
-							m("label[for=hasChatList]", " Chat List"),
-						]),
-						m("div", [
-							m(
-								"input[type=checkbox][name=hasRelatedPeople]#hasRelatedPeople"
-							),
-							m(
-								"label[for=hasRelatedPeople]",
-								" Related People Information"
-							),
-						]),
-						m("div", [
-							m(
-								"input[type=checkbox][name=hasEncryptionKeys]#hasEncryptionKeys",
-								{
-									oninput(e: InputEvent) {
-										hasEncryptionKeys = (
-											e.target as HTMLInputElement
-										).checked;
-									},
-								}
-							),
-							m(
-								"label[for=hasEncryptionKeys]",
-								" Encryption Keys"
-							),
-						]),
-					]),
-					hasEncryptionKeys
+					exportFormat !== "log"
+						? m("fieldset.flex.flex-col#includes", [
+								m("legend", "Included data"),
+								m("div", [
+									m(
+										"input[type=checkbox][checked][name=hasMessages]#hasMessages"
+									),
+									m("label[for=hasMessages]", " Messages"),
+								]),
+								m("div", [
+									m(
+										"input[type=checkbox][checked][name=hasChatList]#hasChatList"
+									),
+									m("label[for=hasChatList]", " Chat List"),
+								]),
+								m("div", [
+									m(
+										"input[type=checkbox][name=hasRelatedPeople]#hasRelatedPeople"
+									),
+									m(
+										"label[for=hasRelatedPeople]",
+										" Related People Information"
+									),
+								]),
+								m("div", [
+									m(
+										"input[type=checkbox][name=hasEncryptionKeys]#hasEncryptionKeys",
+										{
+											oninput(e: InputEvent) {
+												hasEncryptionKeys = (
+													e.target as HTMLInputElement
+												).checked;
+											},
+										}
+									),
+									m(
+										"label[for=hasEncryptionKeys]",
+										" Encryption Keys"
+									),
+								]),
+						  ])
+						: null,
+					hasEncryptionKeys && exportFormat !== "log"
 						? m("fieldset.flex.flex-col#encryptionKeyFormat", [
 								m("legend", "Encryption Keys Format"),
 								m("div", [
@@ -627,36 +947,40 @@ const ExportDataPage = {
 								]),
 						  ])
 						: null,
-					m("fieldset.flex.flex-col#simplified", [
-						m("legend", "Simplified?"),
-						m("div", [
-							m(
-								"input[type=radio][checked][name=simplified][value=yes]#doSimplify"
-							),
-							m("label[for=doSimplify]", " Yes"),
-						]),
-						m("div", [
-							m(
-								"input[type=radio][name=simplified][value=no]#dontSimplify"
-							),
-							m("label[for=dontSimplify]", " No"),
-						]),
-					]),
-					m("fieldset.flex.flex-col#decrypted", [
-						m("legend", "Decrypt?"),
-						m("div", [
-							m(
-								"input[type=radio][checked][name=decrypted][value=yes]#doDecrypt"
-							),
-							m("label[for=doDecrypt]", " Yes"),
-						]),
-						m("div", [
-							m(
-								"input[type=radio][name=decrypted][value=no]#dontDecrypt"
-							),
-							m("label[for=dontDecrypt]", " No"),
-						]),
-					]),
+					exportFormat !== "log"
+						? m("fieldset.flex.flex-col#simplified", [
+								m("legend", "Simplified?"),
+								m("div", [
+									m(
+										"input[type=radio][checked][name=simplified][value=yes]#doSimplify"
+									),
+									m("label[for=doSimplify]", " Yes"),
+								]),
+								m("div", [
+									m(
+										"input[type=radio][name=simplified][value=no]#dontSimplify"
+									),
+									m("label[for=dontSimplify]", " No"),
+								]),
+						  ])
+						: null,
+					exportFormat === "json"
+						? m("fieldset.flex.flex-col#decrypted", [
+								m("legend", "Decrypt?"),
+								m("div", [
+									m(
+										"input[type=radio][checked][name=decrypted][value=yes]#doDecrypt"
+									),
+									m("label[for=doDecrypt]", " Yes"),
+								]),
+								m("div", [
+									m(
+										"input[type=radio][name=decrypted][value=no]#dontDecrypt"
+									),
+									m("label[for=dontDecrypt]", " No"),
+								]),
+						  ])
+						: null,
 					m("fieldset", [
 						m("legend", "Export!"),
 						m("button[type=submit].button", [
