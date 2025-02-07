@@ -125,3 +125,39 @@ export async function encryptMessage(str: string, symmetricKey: CryptoKey) {
 		iv,
 	};
 }
+
+export async function decryptMessage(
+	str: string,
+	iv: Uint8Array,
+	key: CryptoKey
+) {
+	const decoder = new TextDecoder();
+	return decoder.decode(
+		await crypto.subtle.decrypt(
+			{ name: SYMMETRIC_KEY_ALG, iv },
+			key,
+			base64ToArrayBuffer(str)
+		)
+	);
+}
+
+/** Parse the encryption IV for message decryption.
+ * Also checks if the IV string passed in used the old format
+ * (of directly converting Uint8Array into JSON string)
+ * or the new format (capable of storing multiple IVs and use JSON
+ * arrays instead of objects to store the IV itself)
+ */
+export function ivFromJson(str: string) {
+	let obj = JSON.parse(str);
+
+	if (obj["message"] !== undefined) {
+		obj = obj["message"];
+	}
+
+	if (obj instanceof Array) {
+		return new Uint8Array(obj);
+	}
+
+	let arr = Object.keys(obj).map((k) => obj[k]);
+	return new Uint8Array(arr);
+}

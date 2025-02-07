@@ -20,6 +20,7 @@
     "dependencies": {
         "bootstrap-icons": "^1.11.3",
         "dompurify": "^3.2.4",
+        "fflate": "^0.8.2",
         "lodash": "^4.17.21",
         "marked": "^15.0.6",
         "mithril": "^2.2.13",

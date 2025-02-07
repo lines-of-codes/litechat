@@ -5,7 +5,6 @@ import { ChatModel, chats } from "../collections/chats";
 import { pbMithrilFetch } from "../utils/pbMithril";
 import type { UserModel } from "../collections/users";
 import pb, { thisUserId } from "../pocketbase";
-import { base64ToArrayBuffer } from "../utils/base64";
 import { SYMMETRIC_KEY_ALG } from "../crypto";
 import { MessageModel, messages } from "../collections/messages";
 import {
@@ -18,6 +17,8 @@ import {
 	generateChatName,
 	getChatOrUserAvatar,
 	getSymmetricKey,
+	decryptMessage,
+	ivFromJson,
 } from "../utils/chatUtils";
 import { marked, Token } from "marked";
 import Message, {
@@ -53,38 +54,6 @@ let encryptionPromises: { [key: string]: Promise<FileEncryptionResult> } = {};
 
 function updateSelectedFileNames() {
 	selectedFileNames = new Set(selectedFiles.map((f) => f.name));
-}
-
-async function decryptMessage(str: string, iv: Uint8Array, key: CryptoKey) {
-	const decoder = new TextDecoder();
-	return decoder.decode(
-		await crypto.subtle.decrypt(
-			{ name: SYMMETRIC_KEY_ALG, iv },
-			key,
-			base64ToArrayBuffer(str)
-		)
-	);
-}
-
-/** Parse the encryption IV for message decryption.
- * Also checks if the IV string passed in used the old format
- * (of directly converting Uint8Array into JSON string)
- * or the new format (capable of storing multiple IVs and use JSON
- * arrays instead of objects to store the IV itself)
- */
-function ivFromJson(str: string) {
-	let obj = JSON.parse(str);
-
-	if (obj["message"] !== undefined) {
-		obj = obj["message"];
-	}
-
-	if (obj instanceof Array) {
-		return new Uint8Array(obj);
-	}
-
-	let arr = Object.keys(obj).map((k) => obj[k]);
-	return new Uint8Array(arr);
 }
 
 /// Parse Markdown and sanitize output
