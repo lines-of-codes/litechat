@@ -1,3 +1,5 @@
+@reference "./style.css";
+
 html,
 body {
 	height: unset;
