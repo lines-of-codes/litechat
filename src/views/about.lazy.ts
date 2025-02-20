@@ -30,7 +30,7 @@ const AboutPage = {
 					]
 				),
 				m("p", [
-					"litechat is a chat application designed to be lightweight, fast, and secure.",
+					"litechat is a chat application designed to be lightweight, fast, and secure. ",
 					"Open-source under the GPLv3 license.",
 					m("br"),
 					m(
@@ -39,6 +39,18 @@ const AboutPage = {
 							href: "/terms.html",
 						},
 						"Terms and Conditions"
+					),
+				]),
+				m("div", [
+					m("strong", "Logo designed by "),
+					m(
+						"a",
+						{
+							href: "https://techit.dailitation.xyz",
+							rel: "noopener noreferrer",
+							target: "_blank",
+						},
+						"TechitWinner"
 					),
 				]),
 				m("div", [

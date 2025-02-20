@@ -141,7 +141,7 @@ pre {
 		display: grid;
 		@apply grid grid-chat-split;
 		gap: 0.5em;
-		height: 90vh;
+		height: 100%;
 	}
 
 	#chatBackBtn {
@@ -154,7 +154,6 @@ pre {
 			display: flex !important;
 			grid-template-columns: unset !important;
 			padding: 3vh 5vw;
-			height: 87vh !important;
 		}
 
 		&.nochat {

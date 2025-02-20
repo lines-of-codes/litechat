@@ -90,7 +90,7 @@ body {
 
 .grid.wide-content > *:nth-child(2) {
 	max-height: 68vh;
-	overflow: scroll;
+	overflow: auto;
 }
 
 #pageheader {

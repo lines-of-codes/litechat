@@ -1,0 +1,37 @@
+{
+    "name": "litechat",
+    "description": "A fast, lightweight, and secure chat application.",
+    "icons": [
+        {
+            "src": "/logo/litechat-slate-512x512.png",
+            "sizes": "512x512"
+        },
+        {
+            "src": "/logo/litechat-slate-192x192.png",
+            "sizes": "192x192"
+        }
+    ],
+    "start_url": "/",
+    "display": "minimal-ui",
+    "prefer_related_applications": false,
+    "screenshots": [
+        {
+            "src": "/screenshots/desktop_chat.png",
+            "form_factor": "wide",
+            "label": "A desktop view of the chat application.",
+            "sizes": "2560x1440"
+        },
+        {
+            "src": "/screenshots/phone_chat.png",
+            "form_factor": "narrow",
+            "label": "A mobile view of the chat app's chat screen.",
+            "sizes": "750x1334"
+        },
+        {
+            "src": "/screenshots/phone_navbar.png",
+            "form_factor": "narrow",
+            "label": "A mobile view of the chat app's navigation bar.",
+            "sizes": "750x1334"
+        }
+    ]
+}

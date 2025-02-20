@@ -1,3 +1,5 @@
+![Logo](/public/logo/litechat-slate-192x192.png)
+
 # litechat
 
 A chat app designed to be lightweight, fast, and secure.
@@ -8,6 +10,8 @@ privacy and security. But this might not be as secure as Signal.
 However, you might see some similarity between Signal and litechat's terms of service.
 
 _(litechat is not endorsed or affiliated by Signal!)_
+
+Logo designed by [TechitWinner](https://techit.dailitation.xyz)
 
 > [!IMPORTANT]
 > For users: litechat depends on some new & recent browser features.
