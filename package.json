@@ -9,14 +9,14 @@
         "preview": "vite preview"
     },
     "devDependencies": {
-        "@tailwindcss/vite": "^4.0.7",
-        "@types/lodash": "^4.17.15",
+        "@tailwindcss/vite": "^4.0.15",
+        "@types/lodash": "^4.17.16",
         "@types/mithril": "^2.2.7",
-        "@types/node": "^22.13.4",
+        "@types/node": "^22.13.11",
         "typescript": "~5.7.3",
-        "vite": "^6.1.1"
+        "vite": "^6.2.2"
     },
-    "packageManager": "pnpm@10.0.0+sha256.43abf6e720fb7bc53c591b0862605c7d323d0a9d2dd33bcac07b062e13cf4948",
+    "packageManager": "pnpm@10.4.1+sha512.c753b6c3ad7afa13af388fa6d808035a008e30ea9993f58c6663e2bc5ff21679aa834db094987129aa4d488b86df57f7b634981b2f827cdcacc698cc0cfb88af",
     "dependencies": {
         "bootstrap-icons": "^1.11.3",
         "dompurify": "^3.2.4",
@@ -25,6 +25,11 @@
         "marked": "^15.0.7",
         "mithril": "^2.2.14",
         "pocketbase": "^0.23.0",
-        "tailwindcss": "^4.0.7"
+        "tailwindcss": "^4.0.15"
+    },
+    "pnpm": {
+        "onlyBuiltDependencies": [
+            "esbuild"
+        ]
     }
 }
