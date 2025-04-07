@@ -1,6 +1,5 @@
 import type { Component } from "mithril";
 import m from "mithril";
-import { ListResult } from "pocketbase";
 import { users } from "../auth";
 import { UserModel } from "../collections/users";
 import pb, { thisUserId } from "../pocketbase";
@@ -10,56 +9,52 @@ export type SingleUserComponentAttributes = {
 	onUserSelected: (user: UserModel) => any;
 };
 
+interface SingleUserComponentState {
+	userResult: UserModel;
+}
+
+function displayUser(
+	vnode: m.Vnode<SingleUserComponentAttributes, SingleUserComponentState>
+) {
+	const user = vnode.state.userResult;
+	if (user.id === thisUserId) return null;
+	return m(
+		"button.list-tile.button.flex.gap-2.items-center",
+		{
+			onclick: async () => {
+				vnode.attrs.onUserSelected(user);
+			},
+		},
+		[
+			user.avatar === ""
+				? null
+				: m("img.rounded", {
+						src: pb.files.getURL(user, user.avatar),
+						width: 32,
+				  }),
+			m("div", [m("div", user?.name), m("div.secondary", user?.id)]),
+		]
+	);
+}
+
 const SingleUserSelector = {
-	userResults: [],
+	userResult: null,
 	oninit() {},
 	view(vnode) {
 		return m(".flex.flex-col.gap-2", [
 			m("input#idInput[type=text]", {
-				placeholder: "Enter your friend's ID or name",
+				placeholder: "Enter your friend's ID",
 				oninput: async (event: Event) => {
 					let value = (event.target as HTMLInputElement).value;
-					vnode.state.userResults = (await users.getList(1, 15, {
+					if (value.length !== 15) return;
+					vnode.state.userResult = await users.getOne(value, {
 						fetch: pbMithrilFetch,
-						filter: `id = "${value}" || name ~ "${value}"`,
-					})) as ListResult<UserModel>;
+					});
 				},
 			}),
-			this.userResults === null || this.userResults.items === undefined
-				? null
-				: vnode.state.userResults.items.map((user) => {
-						if (user.id === thisUserId) return null;
-						return m(
-							"button.list-tile.button.flex.gap-2.items-center",
-							{
-								onclick: async () => {
-									vnode.attrs.onUserSelected(user);
-								},
-							},
-							[
-								user.avatar === ""
-									? null
-									: m("img.rounded", {
-											src: pb.files.getURL(
-												user,
-												user.avatar
-											),
-											width: 32,
-									  }),
-								m("div", [
-									m("div", user?.name),
-									m("div.secondary", user?.id),
-								]),
-							]
-						);
-				  }),
+			this.userResult === null ? null : displayUser(vnode),
 		]);
 	},
-} as Component<
-	SingleUserComponentAttributes,
-	{
-		userResults: ListResult<UserModel>;
-	}
->;
+} as Component<SingleUserComponentAttributes, SingleUserComponentState>;
 
 export default SingleUserSelector;

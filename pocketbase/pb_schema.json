@@ -173,7 +173,7 @@
   },
   {
     "id": "_pb_users_auth_",
-    "listRule": "",
+    "listRule": null,
     "viewRule": "",
     "createRule": "",
     "updateRule": "id = @request.auth.id",
@@ -1184,7 +1184,7 @@
         "pattern": "",
         "presentable": false,
         "primaryKey": false,
-        "required": true,
+        "required": false,
         "system": false,
         "type": "text"
       },

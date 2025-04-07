@@ -227,3 +227,7 @@ h2 {
 h3 {
 	@apply text-xl font-bold;
 }
+
+.flex-col {
+	flex-direction: column;
+}

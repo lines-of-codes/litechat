@@ -12,13 +12,12 @@ import {
 } from "../crypto";
 import { KeyExchangeModel, keyExchanges } from "../collections/keyexchanges";
 import { arrayBufferToBase64 } from "../utils/base64";
-import { ListResult } from "pocketbase";
 import SingleUserSelector from "../components/singleUserSelect";
 
 type Tab = "single" | "group";
 
 let currentTab: Tab = "single";
-let userResults: ListResult<UserModel> | null = null;
+let userResult: UserModel | null = null;
 let selectedUsers: Array<UserModel> = [];
 
 async function createChat(users: UserModel[]) {
@@ -65,6 +64,31 @@ async function createChat(users: UserModel[]) {
 	window.location.href = `#!/chat/${newChat.id}`;
 }
 
+function displayUser(user: UserModel) {
+	if (
+		selectedUsers.findIndex((v) => v.id === user.id) !== -1 ||
+		user.id === thisUserId
+	)
+		return null;
+	return m(
+		"button.list-tile.button.flex.gap-2.items-center",
+		{
+			onclick: async () => {
+				selectedUsers.push(user);
+			},
+		},
+		[
+			user.avatar === ""
+				? null
+				: m("img.rounded", {
+						src: pb.files.getURL(user, user.avatar),
+						width: 32,
+				  }),
+			m("div", [m("div", user?.name), m("div.secondary", user?.id)]),
+		]
+	);
+}
+
 const NewChat = {
 	view: () => {
 		const singleChat = m(SingleUserSelector, {
@@ -75,19 +99,19 @@ const NewChat = {
 
 		const groupChat = m(".flex.flex-col.gap-2", [
 			m("input#idInput[type=text]", {
-				placeholder: "Enter your friend's ID or name",
+				placeholder: "Enter your friend's ID",
 				onchange: async (event: Event) => {
 					let value = (event.target as HTMLInputElement).value;
-					userResults = (await users.getList(1, 15, {
+					if (value.length !== 15) return;
+					userResult = await users.getOne(value, {
 						fetch: pbMithrilFetch,
-						filter: `id = "${value}" || name ~ "${value}"`,
-					})) as ListResult<UserModel>;
+					});
 				},
 			}),
 			m(".resultList.flex.flex-col.gap-2", [
 				selectedUsers.map((user, index) => {
 					return m(
-						"button.list-tile.button.flex.gap-2.items-center.space-between",
+						"button.list-tile.button.flex.gap-2.items-center.justify-between",
 						{
 							onclick: async () => {
 								selectedUsers.splice(index, 1);
@@ -115,40 +139,7 @@ const NewChat = {
 						]
 					);
 				}),
-				userResults === null
-					? null
-					: userResults.items.map((user) => {
-							if (
-								selectedUsers.findIndex(
-									(v) => v.id === user.id
-								) !== -1 ||
-								user.id === thisUserId
-							)
-								return null;
-							return m(
-								"button.list-tile.button.flex.gap-2.items-center",
-								{
-									onclick: async () => {
-										selectedUsers.push(user);
-									},
-								},
-								[
-									user.avatar === ""
-										? null
-										: m("img.rounded", {
-												src: pb.files.getURL(
-													user,
-													user.avatar
-												),
-												width: 32,
-										  }),
-									m("div", [
-										m("div", user?.name),
-										m("div.secondary", user?.id),
-									]),
-								]
-							);
-					  }),
+				userResult === null ? null : displayUser(userResult),
 			]),
 			m(
 				"button.button",

@@ -63,21 +63,27 @@ async function importFromKeystore() {
 
 	console.log("Decrypting and storing keys...");
 
-	for (const key of keyList) {
-		if (key.oneTime) {
-			scheduledForDeletion.add(key.id);
+	try {
+		for (const key of keyList) {
+			if (key.oneTime) {
+				scheduledForDeletion.add(key.id);
+			}
+
+			if (key.type === "PBKDF2") continue;
+
+			const keyData = await decryptKey(key, derivedKey);
+
+			if (key.type === ASYMMETRIC_KEY_ALG) {
+				localStorage.setItem("privateKey", keyData);
+				continue;
+			}
+
+			localStorage.setItem(`chat_${key.relatedChat}`, keyData);
 		}
-
-		if (key.type === "PBKDF2") continue;
-
-		const keyData = await decryptKey(key, derivedKey);
-
-		if (key.type === ASYMMETRIC_KEY_ALG) {
-			localStorage.setItem("privateKey", keyData);
-			continue;
-		}
-
-		localStorage.setItem(`chat_${key.relatedChat}`, keyData);
+	} catch (err) {
+		console.error(err);
+		alert("Keys decryption failed. Incorrect password may be the case.");
+		return;
 	}
 
 	if (scheduledForDeletion.size !== 0) {
