@@ -24,7 +24,6 @@ dist-ssr
 *.sw?
 
 pocketbase/*
-!pocketbase/pocketbase
 !pocketbase/pb_schema.json
 !pocketbase/LICENSE.md
 !pocketbase/pb_hooks/

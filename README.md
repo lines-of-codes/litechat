@@ -84,8 +84,8 @@ To seperately host, just copy the contents of the `dist` folder to your desired 
 To host both the database and the frontend with the same tool, In the `pocketbase` folder,
 Create a folder called `pb_public` and copy the contents of the `dist` folder into the new `pb_public` folder.
 
-Please do note that the PocketBase binary provided within the `pocketbase` folder of this repository
-is for x64 Linux.
+Now, You will need to download PocketBase from [GitHub Releases](https://github.com/pocketbase/pocketbase/releases/latest)
+and unzip it in the pocketbase folder.
 
 Finally, to start PocketBase, you could:
 
