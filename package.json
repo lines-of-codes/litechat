@@ -9,23 +9,23 @@
         "preview": "vite preview"
     },
     "devDependencies": {
-        "@tailwindcss/vite": "^4.1.6",
-        "@types/lodash": "^4.17.16",
+        "@tailwindcss/vite": "^4.1.13",
+        "@types/lodash": "^4.17.20",
         "@types/mithril": "^2.2.7",
-        "@types/node": "^22.15.17",
+        "@types/node": "^22.18.5",
         "typescript": "~5.7.3",
-        "vite": "^6.3.5"
+        "vite": "^6.3.6"
     },
-    "packageManager": "pnpm@10.11.0+sha512.6540583f41cc5f628eb3d9773ecee802f4f9ef9923cc45b69890fb47991d4b092964694ec3a4f738a420c918a333062c8b925d312f42e4f0c263eb603551f977",
+    "packageManager": "pnpm@10.16.1+sha512.0e155aa2629db8672b49e8475da6226aa4bdea85fdcdfdc15350874946d4f3c91faaf64cbdc4a5d1ab8002f473d5c3fcedcd197989cf0390f9badd3c04678706",
     "dependencies": {
         "bootstrap-icons": "^1.13.1",
-        "dompurify": "^3.2.5",
+        "dompurify": "^3.2.6",
         "fflate": "^0.8.2",
         "lodash": "^4.17.21",
-        "marked": "^15.0.11",
-        "mithril": "^2.3.0",
+        "marked": "^15.0.12",
+        "mithril": "^2.3.7",
         "pocketbase": "^0.23.0",
-        "tailwindcss": "^4.1.6"
+        "tailwindcss": "^4.1.13"
     },
     "pnpm": {
         "onlyBuiltDependencies": [
