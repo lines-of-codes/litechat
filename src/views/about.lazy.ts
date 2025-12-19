@@ -3,32 +3,18 @@ import type { Component } from "mithril";
 
 const AboutPage = {
 	view: () => {
-		return m("[", [
+		return m("#pagecontainer.flex.flex-col.gap-4", [
 			m("header#pageheader", [
 				m(
-					"h1",
+					"a.cleanlink.iconbutton.md",
 					{
-						style: "margin-bottom: 8px;",
+						href: `#!/chat`,
 					},
-					"About"
+					m.trust(`<i class="bi bi-chevron-left"></i>`),
 				),
+				m(".flex.gap-2.items-center.chat-header", [m("span", "About")]),
 			]),
-			m("main#pagecontainer.flex.flex-col.gap-4", [
-				m(
-					"div",
-					{
-						style: "margin-bottom: 15px;",
-					},
-					[
-						m(
-							"a.cleanlink.button",
-							{
-								href: "#!/chat",
-							},
-							"← Back to home"
-						),
-					]
-				),
+			m("main.flex.flex-col.gap-4", [
 				m("p", [
 					"litechat is a chat application designed to be lightweight, fast, and secure. ",
 					"Open-source under the GPLv3 license.",
@@ -38,7 +24,7 @@ const AboutPage = {
 						{
 							href: "/terms.html",
 						},
-						"Terms and Conditions"
+						"Terms and Conditions",
 					),
 				]),
 				m("div", [
@@ -46,11 +32,11 @@ const AboutPage = {
 					m(
 						"a",
 						{
-							href: "https://techit.dailitation.xyz",
+							href: "https://techit.win/",
 							rel: "noopener noreferrer",
 							target: "_blank",
 						},
-						"TechitWinner"
+						"TechitWinner",
 					),
 				]),
 				m("div", [
@@ -59,7 +45,7 @@ const AboutPage = {
 						m.trust(
 							`<a href="https://freesound.org/people/FoolBoyMedia/sounds/352651/">Piano Notification 3</a> by <a href="https://freesound.org/people/FoolBoyMedia/">FoolBoyMedia</a><br/>
                             License: <a href="https://creativecommons.org/licenses/by-nc/4.0/">Attribution NonCommercial 4.0</a><br/>
-                            Original in .mp3 format, converted to .flac`
+                            Original in .mp3 format, converted to .flac`,
 						),
 					]),
 				]),
@@ -73,7 +59,7 @@ const AboutPage = {
 								rel: "noreferrer noopener",
 								target: "_blank",
 							},
-							"Bootstrap Icons"
+							"Bootstrap Icons",
 						),
 						m("span", " "),
 						m(
@@ -83,7 +69,7 @@ const AboutPage = {
 								rel: "noreferrer noopener",
 								target: "_blank",
 							},
-							"(MIT license)"
+							"(MIT license)",
 						),
 					]),
 				]),
@@ -98,7 +84,7 @@ const AboutPage = {
 									target: "_blank",
 									rel: "noopener noreferrer",
 								},
-								"PocketBase (MIT license)"
+								"PocketBase (MIT license)",
 							),
 						]),
 						m("li", [
@@ -109,7 +95,7 @@ const AboutPage = {
 									target: "_blank",
 									rel: "noopener noreferrer",
 								},
-								"Mithril.js (MIT license)"
+								"Mithril.js (MIT license)",
 							),
 						]),
 						m("li", [
@@ -120,7 +106,7 @@ const AboutPage = {
 									target: "_blank",
 									rel: "noopener noreferrer",
 								},
-								"Vite (MIT license)"
+								"Vite (MIT license)",
 							),
 						]),
 						m("li", [
@@ -131,7 +117,7 @@ const AboutPage = {
 									target: "_blank",
 									rel: "noopener noreferrer",
 								},
-								"TypeScript (Apache-2.0 license)"
+								"TypeScript (Apache-2.0 license)",
 							),
 						]),
 						m("li", [
@@ -142,7 +128,18 @@ const AboutPage = {
 									target: "_blank",
 									rel: "noopener noreferrer",
 								},
-								"TailwindCSS (MIT license)"
+								"TailwindCSS (MIT license)",
+							),
+						]),
+						m("li", [
+							m(
+								"a",
+								{
+									href: "https://eslint.org/",
+									target: "_blank",
+									rel: "noopener noreferrer",
+								},
+								"ESLint (MIT license)",
 							),
 						]),
 					]),

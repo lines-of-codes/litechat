@@ -787,7 +787,7 @@ const ExportDataPage = {
 				m("progress#progressBar.w-full.rounded.mt-4"),
 				m("#currentAction"),
 			]),
-			m("header.flex.gap-2", { style: "height: auto;" }, [
+			m("header#pageheader", { style: "height: auto;" }, [
 				m(
 					"a.cleanlink.iconbutton.md",
 					{
@@ -795,9 +795,7 @@ const ExportDataPage = {
 					},
 					m.trust(`<i class="bi bi-chevron-left"></i>`),
 				),
-				m(".flex.gap-2.items-center#chatHeader", [
-					m("span", "Export Data (Beta)"),
-				]),
+				m(".flex.gap-2.items-center.chat-header", "Export Data (Beta)"),
 			]),
 			m(
 				"form[action=].flex.flex-wrap.gap-2",

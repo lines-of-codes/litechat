@@ -22,17 +22,19 @@ const ManageAccount = {
 		email = authRecord.email;
 	},
 	view() {
-		return m(".grid.wide-content", [
-			m("header#pageheader", [m("h1", "Manage Account")]),
-			m("main.grid.gap-4.equal-split#pagecontainer", [
+		return m(".grid.gap-4.wide-content#pagecontainer", [
+			m("header#pageheader", [
+				m(
+					"a.cleanlink.iconbutton",
+					{
+						href: "#!/chat",
+					},
+					m.trust(`<i class="bi bi-chevron-left"></i>`),
+				),
+				m(".flex.gap-2.items-center.chat-header", "Manage Account"),
+			]),
+			m("main.grid.gap-4.equal-split", [
 				m("#left.flex.flex-col.gap-4.items-start", [
-					m(
-						"a.cleanlink.button",
-						{
-							href: "#!/chat",
-						},
-						"← Back to home"
-					),
 					m(".flex.flex-col.gap-2.items-start#displayName", [
 						m("h2", "Name"),
 						m("input#displayName", {
@@ -72,7 +74,7 @@ const ManageAccount = {
 							{
 								href: "#!/exportData",
 							},
-							"Export all data"
+							"Export all data",
 						),
 					]),
 					m(".flex.flex-col.gap-2.items-start#dangerous", [
@@ -84,7 +86,7 @@ const ManageAccount = {
 									const answer = confirm(
 										`Are you sure you want to delete your account? 
 This action is irreversible and all of your data will be erased. 
-If you haven't done it already, you might want to backup your data first.`
+If you haven't done it already, you might want to backup your data first.`,
 									);
 
 									if (!answer) return;
@@ -92,7 +94,7 @@ If you haven't done it already, you might want to backup your data first.`
 									await users.delete(authRecord.id);
 								},
 							},
-							"Delete Account"
+							"Delete Account",
 						),
 					]),
 				]),
@@ -105,13 +107,13 @@ If you haven't done it already, you might want to backup your data first.`
 									src: avatar,
 									alt: "Your profile picture",
 									width: 128,
-							  }),
+								}),
 						m(
 							"label.button",
 							{
 								for: "avatarFile",
 							},
-							"Pick File"
+							"Pick File",
 						),
 						m("input#avatarFile", {
 							type: "file",
@@ -133,26 +135,26 @@ If you haven't done it already, you might want to backup your data first.`
 						m("h2", "Your private key"),
 						m(
 							"p",
-							"Private keys are used to decrypt the chats sent to you."
+							"Private keys are used to decrypt the chats sent to you.",
 						),
 						m(
 							"a.cleanlink.button#importPrivateKey",
 							{
 								href: "#!/importPrivateKey",
 							},
-							"Import Private Key"
+							"Import Private Key",
 						),
 						m(
 							"a.cleanlink.button#exportPrivateKey",
 							{
 								href: "#!/exportPrivateKey",
 							},
-							"Export Private Key"
+							"Export Private Key",
 						),
 					]),
 				]),
 			]),
-			m("div.container", [
+			m("div", [
 				m(
 					"button.button",
 					{
@@ -161,7 +163,7 @@ If you haven't done it already, you might want to backup your data first.`
 							window.location.href = "#!/";
 						},
 					},
-					"Save changes"
+					"Save changes",
 				),
 			]),
 		]);

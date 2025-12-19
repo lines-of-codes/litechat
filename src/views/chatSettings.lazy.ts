@@ -55,7 +55,7 @@ const ChatSettings = {
 					},
 					m.trust(`<i class="bi bi-chevron-left"></i>`),
 				),
-				m("header.flex.gap-2.items-center#chatHeader", [
+				m("header.flex.gap-2.items-center.chat-header", [
 					m("span", "Chat Settings"),
 				]),
 			]),

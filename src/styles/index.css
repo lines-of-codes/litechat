@@ -14,7 +14,7 @@
 	}
 }
 
-#chatHeader {
+.chat-header {
 	background-color: var(--color-700);
 	padding: 8px 10px;
 	border-radius: 5px;

@@ -90,6 +90,7 @@ body {
 /* Designed for use with a single-page content with a header and a footer. */
 .grid.wide-content {
 	grid-template-rows: auto 1fr auto;
+	min-height: 100vh;
 }
 
 .grid.wide-content > *:nth-child(2) {
@@ -98,14 +99,7 @@ body {
 }
 
 #pageheader {
-	text-align: center;
-	padding: 5vh 0;
-	background: var(--color-900);
-	border-bottom: 1px solid var(--color-700);
-
-	h1 {
-		@apply text-4xl font-bold;
-	}
+	@apply flex gap-2;
 }
 
 #navheader {
