@@ -34,7 +34,7 @@ signUpBtn?.addEventListener("click", async () => {
 googleBtn?.addEventListener("click", async () => {
     const response = await authWithGoogle();
 
-    let authRecord = response.record as UserModel;
+    const authRecord = response.record as UserModel;
 
     if (authRecord.publicKey === "") {
         const keyPair = await generateKey();

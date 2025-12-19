@@ -79,6 +79,10 @@ body {
 	height: 90vh;
 }
 
+.grid {
+	display: grid;
+}
+
 .grid.equal-split {
 	grid-template-columns: 1fr 1fr;
 }
@@ -140,7 +144,9 @@ a.button {
 	font-family: inherit;
 	background-color: var(--color-700);
 	cursor: pointer;
-	transition: background-color 0.25s, border-color 0.25s;
+	transition:
+		background-color 0.25s,
+		border-color 0.25s;
 	text-align: center;
 	@apply leading-tight;
 

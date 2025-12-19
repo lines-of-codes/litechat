@@ -6,7 +6,7 @@ import { users } from "../auth";
 
 const authRecord = pb.authStore.record as UserModel;
 let avatar: string = "";
-let formData = new FormData();
+const formData = new FormData();
 let displayName = "";
 let email = "";
 
@@ -41,7 +41,7 @@ const ManageAccount = {
 							placeholder: "Enter your display name...",
 							value: displayName,
 							onchange(event: InputEvent) {
-								let name = (event.target as HTMLInputElement)
+								const name = (event.target as HTMLInputElement)
 									.value;
 								displayName = name;
 								formData.set("name", name);
@@ -56,7 +56,7 @@ const ManageAccount = {
 							placeholder: "Enter your email...",
 							value: email,
 							onchange(event: InputEvent) {
-								let newEmail = (
+								const newEmail = (
 									event.target as HTMLInputElement
 								).value;
 								email = newEmail;
@@ -118,7 +118,7 @@ If you haven't done it already, you might want to backup your data first.`
 							name: "avatarFile",
 							accept: "image/jpeg,image/png,image/svg+xml,image/gif,image/webp",
 							onchange(event: InputEvent) {
-								let newAvatar = (
+								const newAvatar = (
 									event.target as HTMLInputElement
 								).files?.[0];
 

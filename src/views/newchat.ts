@@ -18,7 +18,7 @@ type Tab = "single" | "group";
 
 let currentTab: Tab = "single";
 let userResult: UserModel | null = null;
-let selectedUsers: Array<UserModel> = [];
+const selectedUsers: Array<UserModel> = [];
 
 async function createChat(users: UserModel[]) {
 	if (pb.authStore.record === null) {
@@ -101,7 +101,7 @@ const NewChat = {
 			m("input#idInput[type=text]", {
 				placeholder: "Enter your friend's ID",
 				onchange: async (event: Event) => {
-					let value = (event.target as HTMLInputElement).value;
+					const value = (event.target as HTMLInputElement).value;
 					if (value.length !== 15) return;
 					userResult = await users.getOne(value, {
 						fetch: pbMithrilFetch,

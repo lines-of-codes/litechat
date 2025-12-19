@@ -104,7 +104,7 @@ const ImportKeyPage = {
 				type: "text",
 				placeholder: "Enter private key...",
 				onchange(event: InputEvent) {
-					let newKey = (event.target as HTMLInputElement).value;
+					const newKey = (event.target as HTMLInputElement).value;
 					key = newKey;
 				},
 			}),
@@ -134,7 +134,7 @@ const ImportKeyPage = {
 				type: "file",
 				accept: ".json",
 				onchange(e: Event) {
-					let input = e.target as HTMLInputElement;
+					const input = e.target as HTMLInputElement;
 
 					if (input.files === null || input.files[0] === null) return;
 
@@ -173,7 +173,7 @@ const ImportKeyPage = {
 				type: "password",
 				placeholder: "Enter keystore password...",
 				onchange(event: InputEvent) {
-					let value = (event.target as HTMLInputElement).value;
+					const value = (event.target as HTMLInputElement).value;
 					password = value;
 				},
 			}),

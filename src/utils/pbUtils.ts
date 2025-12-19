@@ -1,16 +1,16 @@
 const snakecaseSplitRegex = new RegExp(/[\W_]+/);
-const extInvalidCharsRegex = new RegExp(/[^\w\.\*\-\+\=\#]+/g);
+const extInvalidCharsRegex = new RegExp(/[^\w.*\-+=#]+/g);
 
 function isUpper(char: string) {
-	if (!isNaN(parseInt(char))) {
-		return false;
-	}
+    if (!isNaN(parseInt(char))) {
+        return false;
+    }
 
-	if (char === char.toUpperCase()) {
-		return true;
-	}
+    if (char === char.toUpperCase()) {
+        return true;
+    }
 
-	return false;
+    return false;
 }
 
 /**
@@ -19,30 +19,30 @@ function isUpper(char: string) {
  * @param str The string to transform
  */
 function snakecase(str: string): string {
-	let words = str.split(snakecaseSplitRegex);
-	let result = "";
+    const words = str.split(snakecaseSplitRegex);
+    let result = "";
 
-	for (let i = 0; i < words.length; i++) {
-		let word = words[i];
+    for (let i = 0; i < words.length; i++) {
+        const word = words[i];
 
-		if (word === "") continue;
+        if (word === "") continue;
 
-		if (result.length > 0) {
-			result += "_";
-		}
+        if (result.length > 0) {
+            result += "_";
+        }
 
-		for (let j = 0; j < word.length; j++) {
-			const c = word[j];
+        for (let j = 0; j < word.length; j++) {
+            const c = word[j];
 
-			if (isUpper(c) && j > 0 && !isUpper(word[j - 1])) {
-				result += "_";
-			}
+            if (isUpper(c) && j > 0 && !isUpper(word[j - 1])) {
+                result += "_";
+            }
 
-			result += c;
-		}
-	}
+            result += c;
+        }
+    }
 
-	return result.toLowerCase();
+    return result.toLowerCase();
 }
 
 /**
@@ -52,19 +52,19 @@ function snakecase(str: string): string {
  * @returns The file extension
  */
 export function extractExtension(name: string): string {
-	const primaryDot = name.lastIndexOf(".");
+    const primaryDot = name.lastIndexOf(".");
 
-	if (primaryDot === -1) {
-		return "";
-	}
+    if (primaryDot === -1) {
+        return "";
+    }
 
-	const secondaryDot = name.substring(0, primaryDot).lastIndexOf(".");
+    const secondaryDot = name.substring(0, primaryDot).lastIndexOf(".");
 
-	if (secondaryDot >= 0) {
-		return name.substring(secondaryDot);
-	}
+    if (secondaryDot >= 0) {
+        return name.substring(secondaryDot);
+    }
 
-	return name.substring(primaryDot);
+    return name.substring(primaryDot);
 }
 
 /**
@@ -74,23 +74,23 @@ export function extractExtension(name: string): string {
  * @returns The "normalized file name"
  */
 export function normalizeName(fileName: string) {
-	const originalExt = extractExtension(fileName);
-	let cleanExt = originalExt.replaceAll(extInvalidCharsRegex, "");
+    const originalExt = extractExtension(fileName);
+    let cleanExt = originalExt.replaceAll(extInvalidCharsRegex, "");
 
-	if (cleanExt.length > 20) {
-		cleanExt = "." + cleanExt.substring(cleanExt.length - 20);
-	}
+    if (cleanExt.length > 20) {
+        cleanExt = "." + cleanExt.substring(cleanExt.length - 20);
+    }
 
-	let cleanName = snakecase(
-		fileName.substring(0, fileName.length - originalExt.length)
-	);
+    let cleanName = snakecase(
+        fileName.substring(0, fileName.length - originalExt.length)
+    );
 
-	if (cleanName.length < 3) {
-		// Pretend that it's a string of random characters
-		cleanName += "aaaaaaaaaa";
-	} else if (cleanName.length > 100) {
-		cleanName = cleanName.substring(0, 100);
-	}
+    if (cleanName.length < 3) {
+        // Pretend that it's a string of random characters
+        cleanName += "aaaaaaaaaa";
+    } else if (cleanName.length > 100) {
+        cleanName = cleanName.substring(0, 100);
+    }
 
-	return `${cleanName}_aaaaaaaaaa${cleanExt}`;
+    return `${cleanName}_aaaaaaaaaa${cleanExt}`;
 }

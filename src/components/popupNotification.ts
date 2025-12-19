@@ -1,11 +1,11 @@
 import type { Component } from "mithril";
 import m from "mithril";
 
-let notifications: string[] = [];
+const notifications: string[] = [];
 
 export function addNotification(text: string, duration?: number) {
 	console.log("New notification.");
-	let newLength = notifications.push(text);
+	const newLength = notifications.push(text);
 	setInterval(() => {
 		notifications.splice(newLength - 1, 1);
 		m.redraw();

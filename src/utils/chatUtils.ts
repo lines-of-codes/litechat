@@ -34,7 +34,7 @@ export function getChatOrUserAvatar(chat: ChatModel, recipients: UserModel[]) {
     if (chat.photo !== "") {
         avatarUrl = pb.files.getURL(chat, chat.photo);
     } else {
-        let chosenUser = recipients.find(
+        const chosenUser = recipients.find(
             (v) => v.id !== pb.authStore.record?.id && v.avatar !== ""
         );
 
@@ -83,7 +83,7 @@ export async function getSymmetricKey(
             console.error("An error occurred while fetching key exchanges.");
             console.error(err);
 
-            let answer = prompt(
+            const answer = prompt(
                 "We do not have the encryption key to this chat. If you do have a backup key, please enter it below."
             );
 
@@ -158,6 +158,6 @@ export function ivFromJson(str: string) {
         return new Uint8Array(obj);
     }
 
-    let arr = Object.keys(obj).map((k) => obj[k]);
+    const arr = Object.keys(obj).map((k) => obj[k]);
     return new Uint8Array(arr);
 }

@@ -1,7 +1,7 @@
 import type { Component } from "mithril";
 import m from "mithril";
 
-let components: { [key: string]: Component } = {};
+const components: { [key: string]: Component } = {};
 
 const LazyView = (file: string) =>
 	({
