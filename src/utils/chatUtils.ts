@@ -49,7 +49,8 @@ export function getChatOrUserAvatar(chat: ChatModel, recipients: UserModel[]) {
 /// Returns a CryptoKey if succeed, null if failed.
 export async function getSymmetricKey(
     receiver: string,
-    chatId: string
+    chatId: string,
+    askIfMissing = true
 ): Promise<CryptoKey | null> {
     let keyText = localStorage.getItem(`chat_${chatId}`);
 
@@ -83,17 +84,20 @@ export async function getSymmetricKey(
             console.error("An error occurred while fetching key exchanges.");
             console.error(err);
 
-            const answer = prompt(
-                "We do not have the encryption key to this chat. If you do have a backup key, please enter it below."
-            );
-
-            if (answer === null || answer.trim() === "") {
-                return null;
+            if (askIfMissing) {
+                const answer = prompt(
+                    "We do not have the encryption key to this chat. If you do have a backup key, please enter it below."
+                );
+    
+                if (answer === null || answer.trim() === "") {
+                    return null;
+                }
+    
+                keyText = answer;
             }
-
-            keyText = answer;
         }
 
+        if (keyText === null) return null;
         localStorage.setItem(`chat_${chatId}`, keyText);
     }
 

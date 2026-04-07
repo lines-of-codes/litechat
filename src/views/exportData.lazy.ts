@@ -86,7 +86,7 @@ async function processChatData(
 
 		chatNames[chat.id] = name;
 
-		const symKey = await getSymmetricKey(thisUserId, chat.id);
+		const symKey = await getSymmetricKey(thisUserId, chat.id, false);
 
 		if (symKey === null) {
 			undecryptableChat.push(`${chatNames[chat.id]} (${chat.id})`);
